@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- 
 	Basically what was known as 'CustomModTables'.
-	Your MOD must run this file OnModActivated, followed by Configuration.xml.
+	Your MOD must run this file OnModActivated! 
+	You can toggle more features in another XML via CustomModOptions table.
 -->
 <GameData>
 	<!-- Determines which options the player has enabled, lets you config DLL options through DB. -->
@@ -43,4 +44,179 @@
 			<Value>3</Value>
 		</Replace>
 	</Defines>
+
+<!-- 
+	------
+	Standerdized minimal tweaks and options + bug fixes.
+	------
+-->
+  <CustomModOptions>
+    <!-- V19 was the first version for BNW - all options prior to this are flagged as being for v19 -->
+
+    <!-- "See also: Mod Name" refers to mods on www.picknmixmods.com -->
+    <!-- Any option with a "See also" and a default value of 0 should not be enabled directly in this file but only via a mod -->
+    
+    <!-- Class -->
+    <!--   0=Data   - Data used by other components -->
+    <!--   1=BugFix - Bug fixes, usually wanted -->
+    <!--   2=API    - API, no effect and very minor overhead unless used by another mod -->
+    <!--   3=Events - Events, overhead even if not used by another mod -->
+    <!--   4=Minor  - Minor enhancements, limited game play changes -->
+    <!--   5=Common - Common enhancements, obvious game play changes -->
+    <!--   6=Major  - Major enhancements, massive game play changes -->
+
+    <!-- DbUpdates - indicates if the DLL code requires associated database changes -->
+    <!--   Missing - no associated database updates -->
+    <!--         0 - unimportant database updates (usually TXT_KEY_s that if deleted won't cause serious problems -->
+    <!--         1 - required database updates -->
+    <!--   The sql/xml changes for GLOBAL_STACKING_RULES can be found in DB/GLOBAL/SackingRules.sql/xml -->
+    <!--   If these file(s) have been deleted, eg for compatibility with other mods, the option will be forced off -->
+
+<!---- 
+	HAT: Enabled Events
+---->	
+    <!-- Enhanced Diplomacy Modifiers events (v53) -->
+    <!--   GameEvents.GetDiploModifier.Add(function(iEvent, iFromPlayer, iToPlayer) return 0 end) -->
+    <Row Class="3" Name="EVENTS_DIPLO_MODIFIERS" Value="1" DbUpdates="1"/>
+	
+<!---- 
+	HAT: Just API tweaks, may use them for something sometimes.
+---->	
+    <!-- Most API enhancements cannot be turned on or off, those entries (*) are just here to get their entries into the CustomMod.log file -->
+    <!-- Enables the Plot Based Damage API (replaces fixed damage from mountains) (v19) -->
+    <!-- Take care when enabling this and adding terrain based damage for ice as you will probably want to give submarines the IgnoreTerrainDamage promotion -->
+    <!-- See also: "Promotions - Terrain Crossing" -->
+    <Row Class="2" Name="API_PLOT_BASED_DAMAGE" Value="1" DbUpdates="1"/>
+
+    <!-- Enables the Plot Yield tables (v35) -->
+    <!-- See also: "Religion - Bonus Beliefs" -->
+    <Row Class="2" Name="API_PLOT_YIELDS" Value="1" DbUpdates="1"/>
+
+    <!-- * Enables the Unified Yields extensions (v54) -->
+    <Row Class="2" Name="API_UNIFIED_YIELDS" Value="1" DbUpdates="1"/>
+    <!-- * Enables the Unified Yields (YIELD_TOURISM) extensions (v56) -->
+    <Row Class="2" Name="API_UNIFIED_YIELDS_TOURISM" Value="1" DbUpdates="1"/>
+    <!-- * Enables the Unified Yields (YIELD_GOLDEN_AGE_POINTS) extensions (v57) -->
+    <Row Class="2" Name="API_UNIFIED_YIELDS_GOLDEN_AGE" Value="1" DbUpdates="1"/>
+
+    <!-- Enables the Achievements table (v45) -->
+    <!--<Row Class="2" Name="API_ACHIEVEMENTS" Value="0" DbUpdates="1"/>-->
+
+    <!-- Enables the Player Logs API (v68) -->
+    <Row Class="2" Name="API_PLAYER_LOGS" Value="0"/> <!-- TODO: Use? -->
+
+    <!-- * Enables the Espionage API (v19) -->
+    <!-- See also: "Global - Espionage Race" -->
+    <!-- See also: "Global - Espionage Mapping" -->
+    <Row Class="2" Name="API_ESPIONAGE" Value="1"/>
+
+    <!-- * Enables the Trade Routes API (v23) -->
+    <!-- See also: "UI - Trade Routes Enhancements" -->
+    <Row Class="2" Name="API_TRADEROUTES" Value="1"/>
+
+    <!-- * Enables the Religion API (v19) -->
+    <!-- See also: "Religion - Natural Wonder Epiphany" -->
+    <Row Class="2" Name="API_RELIGION" Value="1"/>
+
+    <!-- * Enables the LUA Extensions API - see http://forums.civfanatics.com/showthread.php?t=492305 (v19) -->
+    <Row Class="2" Name="API_LUA_EXTENSIONS" Value="1"/>
+    <!-- * Enables the Extensions API (v19) -->
+    <!-- See also: "Unique Building - Cistern" -->
+    <Row Class="2" Name="API_EXTENSIONS" Value="1" DbUpdates="1"/>
+    <!-- * Push various hard-coded values controlling the game out into XML - see DB/CONFIG/GameInXml.xml for specific values (v53) -->
+    <Row Class="2" Name="CONFIG_GAME_IN_XML" Value="1" DbUpdates="1"/>
+    <!-- * Push various hard-coded values controlling the AI out into XML - see DB/CONFIG/AiInXml.sql for specific values (v19) -->
+    <Row Class="2" Name="CONFIG_AI_IN_XML" Value="1" DbUpdates="1"/>
+
+<!---- 
+	HAT: Various bug fixes, I don't see any particular issues or game-changing tweak here.
+---->        
+    <!-- Some bug fixes cannot be turned on or off, those entries (*) are just here to get their entries into the CustomMod.log file -->
+	
+	<!-- HAT TODO: Add configurability for this, theres no such option yet. -->
+    <!--<Row Class="1" Name="BUGFIX_IROQ_UA_FIX" Value="1"/>-->
+	
+    <!-- * Fixes the bug where a city doesn't work its centre tile (v45) -->
+    <Row Class="1" Name="BUGFIX_CITY_CENTRE_WORKING" Value="1"/>
+	<!-- * Fixes the bug of creating a capital from a puppet city, and leaving it that way (v73) -->
+    <Row Class="1" Name="BUGFIX_NO_PUPPET_CAPITALS" Value="1"/>
+    <!-- * Adds missing policy events when adopting an ideology (v33) -->
+    <Row Class="1" Name="BUGFIX_MISSING_POLICY_EVENTS" Value="1"/>
+    <!-- * Fixes trade routes sticking to coastal water when the player has the EmbarkAllWater trait (v33) -->
+    <Row Class="1" Name="BUGFIX_TRADE_ROUTES_EMBARK_ALL_WATER" Value="1"/>
+    <!-- * Fixes the bug where Venice puppets it's own capital (v42) -->
+    <Row Class="1" Name="BUGFIX_VENICE_PUPPETS_CAPITAL" Value="1"/>
+    <!-- Fixes the issues with using dummy policies (v77) -->
+	<!-- From: "Policy - Dummies" TODO: No such policy, but I assume I have to set the 'Dummy' boolean on a per-policy basis. -->
+    <Row Class="1" Name="BUGFIX_DUMMY_POLICIES" Value="1" DbUpdates="1"/>
+    <!-- Fixes the 'radaring' bug/exploit - see https://www.reddit.com/r/nqmod/comments/34reu9/how_to_remove_radaring/ (v74) -->
+    <!-- Disables the ability to use civilian units to find enemy units on non-visible tiles -->
+    <Row Class="1" Name="BUGFIX_RADARING" Value="1"/>
+    <!-- Fixes the research overflow bug/exploit (v52) -->
+    <!-- Disables the science overflow exploit where you can get more science back than you gained from bulbing Great Scientists -->
+    <Row Class="1" Name="BUGFIX_RESEARCH_OVERFLOW" Value="1"/>
+    <!-- * Fixes the bug in the Lua Plot:ChangeVisibilityCount() method where iChange is treated as a boolean and not a signed int (v23) -->
+	<!-- From: "Units - Visible Trade Units" -->
+    <Row Class="1" Name="BUGFIX_LUA_CHANGE_VISIBILITY_COUNT" Value="1"/>
+    <!-- Fixes the bug that excludes spy pressure (Underground Sects) from the city banner tooltip display (v45) -->
+    <Row Class="1" Name="BUGFIX_RELIGIOUS_SPY_PRESSURE" Value="1"/>
+    <!-- * Fixes the CanMoveAfterPurchase() bug where it is only tested for at one specific point in the code (v26) -->
+    <Row Class="1" Name="BUGFIX_MOVE_AFTER_PURCHASE" Value="1"/>
+    <!-- * Fixes the issues caused by using UNIT_XYZ instead of UNITCLASS_XYZ (v26) -->
+    <Row Class="1" Name="BUGFIX_UNITCLASS_NOT_UNIT" Value="1" DbUpdates="1"/>
+    <!-- * Fixes the issues caused by using BUILDING_XYZ instead of BUILDINGCLASS_XYZ (v26) -->
+    <Row Class="1" Name="BUGFIX_BUILDINGCLASS_NOT_BUILDING" Value="1"/>
+    <!-- * Fixes the NumCitiesFreeFoodBuilding (policy finisher) bug where the civilization has a UB for the Aquaduct (v19) -->
+	<!-- From: "Unique Building - Turkish Baths" -->
+    <Row Class="1" Name="BUGFIX_FREE_FOOD_BUILDING" Value="1"/>
+    <!-- * Fixes the bug where the naval Civilization_FreeUnits start on land (v19) -->
+    <Row Class="1" Name="BUGFIX_NAVAL_FREE_UNITS" Value="1"/>
+    <!-- Fixes the bug where the naval units in Razed cities jump to the nearest city and not the nearest available non-lake water plot (v19) -->
+    <Row Class="1" Name="BUGFIX_NAVAL_NEAREST_WATER" Value="1"/>
+    <!-- Fixes the bug where stacked ranged units may attack out of cities but melee units may not (v19) -->
+	<!-- From: "Global - 2 Units Per Fort" -->
+    <!-- From: "Global - 3 Units Per City" -->
+    <!-- From: "Global - No Followup From Cities" -->
+    <Row Class="1" Name="BUGFIX_CITY_STACKING" Value="1"/>
+    <!-- Fixes the bug where Barb Camps ignore the ValidTerrains and ValidFeatures tables (v19) -->
+    <Row Class="1" Name="BUGFIX_BARB_CAMP_TERRAINS" Value="1"/>
+    <!-- Fixes the bug where Barb Camps won't spawn units if they are added via pPlot:SetImprovementType() (v21) -->
+    <Row Class="1" Name="BUGFIX_BARB_CAMP_SPAWNING" Value="1"/>
+    <!-- Fixes the bug where ranged combat (archers, catapults, ships and planes) against barbarians generates Great People XP (v43) -->
+    <Row Class="1" Name="BUGFIX_BARB_GP_XP" Value="1"/>
+    <!-- Fixes the bug where your workers can't remove roads in no-mans-land originally built by a now dead player (v19) -->
+    <Row Class="1" Name="BUGFIX_REMOVE_GHOST_ROUTES" Value="1"/>
+    <!-- Fixes Healing/Sleeping units. Will awake when under direct attack or an enemy unit is visible (as if they were on Alert) (v19) -->
+    <Row Class="1" Name="BUGFIX_UNITS_AWAKE_IN_DANGER" Value="1"/>
+    <!-- Fixes workers stopping what they are doing at any hint of danger (v19) -->
+	<!-- Workers will only stop working if the enemy unit is actually visible (and not just somewhere in the vicinity) -->
+    <Row Class="1" Name="BUGFIX_WORKERS_VISIBLE_DANGER" Value="1"/>
+    <!-- Fixes the hard-coding of what builds remove which features (v45) -->
+    <Row Class="1" Name="BUGFIX_FEATURE_REMOVAL" Value="1" DbUpdates="1"/>
+    <!-- Fixes the bug in calculating AA interception strength which takes terrain into account (v19) -->
+    <Row Class="1" Name="BUGFIX_INTERCEPTOR_STRENGTH" Value="1"/>
+    <!-- Fixes the very dodgy maths in the calculation of a unit's power (v19) -->
+    <Row Class="1" Name="BUGFIX_UNIT_POWER_CALC" Value="1"/>
+    <!-- Fixes the Anti-Air non-domain bonuses issue, requires BUGFIX_UNIT_POWER_CALC to be enabled (v19) -->
+	<!-- From: "Promotions - AntiAir Only Defensive" -->
+    <Row Class="1" Name="BUGFIX_UNIT_POWER_BONUS_VS_DOMAIN_ONLY" Value="1"/>
+    <!-- Fixes the naval imbalance in a unit's power calculation, requires BUGFIX_UNIT_POWER_CALC to be enabled (v19) -->
+    <Row Class="1" Name="BUGFIX_UNIT_POWER_NAVAL_CONSISTENCY" Value="1"/>
+    <!-- * Fixes the bug where units can upgrade even without any pre-req project being available (v22) -->  
+    <Row Class="1" Name="BUGFIX_UNIT_PREREQ_PROJECT" Value="1"/>
+    <!-- * Fixes a bug where hovering units can be chosen as rebels! (v39) -->  
+    <Row Class="1" Name="BUGFIX_NO_HOVERING_REBELS" Value="1"/>
+    <!-- * Fixes a bug in the pathfinder code for hovering units at the seaside! (v19) -->  
+    <Row Class="1" Name="BUGFIX_HOVERING_PATHFINDER" Value="1"/>
+  </CustomModOptions>
+
+  <CustomModPostDefines>
+    <!-- Give initial production boost for cities founded on forests, as if the forest had been chopped down by a worker (v19) -->
+    <!-- See also: "Global - City Forest Bonus" -->
+    <!-- Row Name="GLOBAL_CITY_FOREST_BONUS_TECH" Table="Technologies" Type="TECH_MINING"/ --> <!-- Required tech (v47) -->
+
+    <!-- Give initial production boost for cities founded on jungle, as if the jungle had been chopped down by a worker (v72) -->
+    <!-- See also: "Global - City Jungle Bonus" -->
+    <!-- Row Name="GLOBAL_CITY_JUNGLE_BONUS_TECH" Table="Technologies" Type="TECH_BRONZE_WORKING"/ --> <!-- Required tech -->
+  </CustomModPostDefines>
 </GameData>

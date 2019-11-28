@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- DLL: GLOBAL_NO_FOLLOWUP tweak -->
+	<Improvements>
+		<Update>
+			<Where Type="IMPROVEMENT_CITADEL"/>
+			<Set NoFollowup="1"/>
+		</Update>
+		<Update>
+			<Where Type="IMPROVEMENT_FORT"/>
+			<Set NoFollowup="1"/>
+		</Update>
+		<Update>
+			<Where Type="IMPROVEMENT_KASBAH"/>
+			<Set NoFollowup="1"/>
+		</Update>
+		<Update>
+			<Where Type="IMPROVEMENT_FEITORIA"/>
+			<Set NoFollowup="1"/>
+		</Update>
+		<Update>
+			<Where Type="IMPROVEMENT_CHATEAU"/>
+			<Set NoFollowup="1"/>
+		</Update>
+	</Improvements>
+</GameData>

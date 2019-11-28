@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- MOD_BUGFIX_GOODY_HUT_MESSAGES -->
+	<Language_en_US>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_GOLD"/>
+			<Set>
+				<Text>In the ruins you find the treasures of an ancient empire!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_PROPHET_FAITH"/>
+			<Set>
+				<Text>You have found a secret religious community. The preacher foretells the arrival of a Great Prophet.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_FAITH"/>
+			<Set>
+				<Text>You have found an ancient oracle. The priestess has blessed you with a divine revelation.</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_GOODY_CULTURE"/>
+			<Set>
+				<Text>You have found cultural artifacts which awe your citizens!</Text>
+			</Set>
+		</Update>
+		<Update>
+			<Where Tag="TXT_KEY_MISC_RECEIVED_GOLD"/>
+			<Set>
+				<Text>[SPACE]You have received {1_Num} [ICON_GOLD] Gold!</Text>
+			</Set>
+		</Update>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_CULTURE">
+			<Text>[SPACE]You have received {1_Num} [ICON_CULTURE] Culture!</Text>
+		</Row>
+		<Row Tag="TXT_KEY_MISC_RECEIVED_FAITH">
+			<Text>[SPACE]You have received {1_Num} [ICON_PEACE] Faith!</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- Religion API -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_ACTIVE_PLAYER">
+			<Text>You have enhanced your pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED">
+			<Text>{1_CivName} {1: plural 1?has; 2?have;} enhanced their pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_UNKNOWN">
+			<Text>An unknown civilization has enhanced their pantheon by adding a new belief.</Text>
+		</Row>
+		<Row Tag="TXT_KEY_NOTIFICATION_PANTHEON_ENHANCED_S">
+			<Text>Pantheon Enhanced</Text>
+		</Row>
+	</Language_en_US>
+
+	<!-- Espionage API -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_SPY_NAME_UNKNOWN">
+			<Text>Unknown</Text>
+		</Row>
+	</Language_en_US>
+ 	<Language_en_US>
+		<Row Tag="TXT_KEY_SPY_STATE_TERMINATED">
+			<Text>Eliminated!</Text>
+		</Row>
+	</Language_en_US>
+	
+	<!-- UnifiedYieldsGoldenAge.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_YIELD_GOLDEN_AGE_POINTS">
+			<Text>Golden Age</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_GOLDEN_AGE_POINTS_YIELD_TT">
+			<Text>{1_Num} [ICON_GOLDEN_AGE] Golden Age</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GOLDEN_AGE_POINTS_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_GOLDEN_AGE] from Trade Routes established with this city</Text>
+		</Row>
+	</Language_en_US>
+    
+	<!-- UnifiedYieldsTourism.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_YIELD_TOURISM">
+			<Text>Tourism</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOP_PANEL_ITR_TOURISM_YIELD_TT">
+			<Text>{1_Num} [ICON_TOURISM] Tourism</Text>
+		</Row>
+		<Row Tag="TXT_KEY_TOURISM_FROM_TRADE_ROUTES">
+			<Text>{1_perTurn:number "#.##"} [ICON_TOURISM] from Trade Routes established with this city</Text>
+		</Row>
+	</Language_en_US>
+    
+	<!-- UnitclassNotUnit.xml -->
+	<Language_en_US>
+		<Row Tag="TXT_KEY_TP_FAITH_NEXT_PROPHET_PARAM">
+			<Text>{1_Num} [ICON_PEACE] Faith is minimum required for your next chance at a {2_UNITCLASS_PROPHET}.</Text>
+		</Row>
+
+		<Row Tag="TXT_KEY_RO_FAITH_TOOLTIP_PARAM">
+			<Text>Need minimum of {1_MinFaith} [ICON_PEACE] Faith for next {2_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PROPHET_PARAM">
+			<Text>Save for {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+		<Row Tag="TXT_KEY_RO_AUTO_FAITH_PURCHASE_PROPHET_PARAM">
+			<Text>Purchase {1_UNITCLASS_PROPHET}</Text>
+		</Row>
+	</Language_en_US>
+</GameData>

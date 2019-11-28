@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<!-- Prophets: 100% chance to spawn, up from 5% initial. DLL: RELIGION_KEEP_PROPHET_OVERFLOW -->
+	<Defines>
+		<Update>
+			<Set Value="100" />
+			<Where Name="RELIGION_BASE_CHANCE_PROPHET_SPAWN"/>
+		</Update>
+	</Defines>
+	
+	<CustomModDbUpdates>
+		<Row Name="RELIGION_KEEP_PROPHET_OVERFLOW" Value="1"/>
+	</CustomModDbUpdates>
+</GameData>
