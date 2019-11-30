@@ -31,9 +31,9 @@
  *****                                                                  *****
  ****************************************************************************
  ****************************************************************************/
-#define MOD_DLL_GUID {0xcf7d28a8, 0x1684, 0x4420, { 0xaf, 0x45, 0x11, 0x7, 0xc, 0xb, 0x8c, 0x4a }} // {CF7D28A8-1684-4420-AF45-11070C0B8C4A}
-#define MOD_DLL_NAME "Pick'N'Mix BNW DLL"
-#define MOD_DLL_VERSION_NUMBER ((uint) 94)
+#define MOD_DLL_GUID { 0xe1bde3ad, 0x8320, 0x466b, { 0xb4, 0xde, 0x5c, 0x5b, 0x8d, 0xa8, 0xfc, 0x87 } } // {E1BDE3AD-8320-466B-B4DE-5C5B8DA8FC87}
+#define MOD_DLL_NAME "CalzMod"
+#define MOD_DLL_VERSION_NUMBER ((uint) 2)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 

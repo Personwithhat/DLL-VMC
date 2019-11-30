@@ -1,0 +1,8 @@
+# Binary directories.
+/BuildOutput/*
+/BuildTemp/*
+.vs/*
+
+# Don't bother updating this everytime we build. Just assume I'd build it myself.
+/FOR_MODS/*.dll
+/FOR_MODS/*.pdb
