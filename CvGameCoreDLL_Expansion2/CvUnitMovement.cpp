@@ -95,16 +95,24 @@ void CvUnitMovement::GetCostsForMove(const CvUnit* pUnit, const CvPlot* pFromPlo
 		iRouteCost = std::max(iFromMovementCost + kUnitTeam.getRouteChange(pFromPlot->getRouteType()), iMovementCost + kUnitTeam.getRouteChange(pToPlot->getRouteType()));
 		iRouteFlatCost = std::max(iFromFlatMovementCost * iBaseMoves, iFlatMovementCost * iBaseMoves);
 	}
-	else if(pUnit->getOwner() == pToPlot->getOwner() && (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE) && pTraits->IsMoveFriendlyWoodsAsRoad())
-	{
-		CvRouteInfo* pRoadInfo = GC.getRouteInfo(ROUTE_ROAD);
-		iRouteCost = pRoadInfo->getMovementCost();
-		iRouteFlatCost = pRoadInfo->getFlatMovementCost() * iBaseMoves;
-	}
 	else
 	{
 		iRouteCost = INT_MAX;
 		iRouteFlatCost = INT_MAX;
+
+		// PERSONAL EDITS: Iroq forests function as roads properly now
+		if (pTraits->IsMoveFriendlyWoodsAsRoad())
+		{
+			bool toPlotUA   = pUnit->getOwner() == pToPlot->getOwner() && (eFeature == FEATURE_FOREST || eFeature == FEATURE_JUNGLE);
+			bool fromPlotUA = pUnit->getOwner() == pFromPlot->getOwner() && (pFromPlot->getFeatureType() == FEATURE_FOREST || pFromPlot->getFeatureType() == FEATURE_JUNGLE);
+
+			// UA on both tiles, or UA from to road, or from road to UA. Basically forest == a route_road.
+			if ((fromPlotUA && toPlotUA) || (pFromPlot->isValidRoute(pUnit) && toPlotUA) || (fromPlotUA && pToPlot->isValidRoute(pUnit))) {
+				CvRouteInfo* pRoadInfo = GC.getRouteInfo(ROUTE_ROAD);
+				iRouteCost = pRoadInfo->getMovementCost() + kUnitTeam.getRouteChange(ROUTE_ROAD);
+				iRouteFlatCost = pRoadInfo->getFlatMovementCost() * iBaseMoves;
+			}
+		}
 	}
 
 	TeamTypes eTeam = pToPlot->getTeam();
