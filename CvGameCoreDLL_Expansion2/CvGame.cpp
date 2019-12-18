@@ -5761,21 +5761,18 @@ bool CvGame::isPaused()
 //	-----------------------------------------------------------------------------------------------
 void CvGame::setPausePlayer(PlayerTypes eNewValue)
 {
-	if(!isNetworkMultiPlayer())
+	// If the game is paused the turn timer is too.
+	if(isOption(GAMEOPTION_END_TURN_TIMER_ENABLED))
 	{
-		// If we're not in Network MP, if the game is paused the turn timer is too.
-		if(isOption(GAMEOPTION_END_TURN_TIMER_ENABLED))
+		if(eNewValue != NO_PLAYER && m_ePausePlayer == NO_PLAYER)
 		{
-			if(eNewValue != NO_PLAYER && m_ePausePlayer == NO_PLAYER)
-			{
-				m_fCurrentTurnTimerPauseDelta += m_curTurnTimer.Stop();
-				m_timeSinceGameTurnStart.Stop();
-			}
-			else if(eNewValue == NO_PLAYER && m_ePausePlayer != NO_PLAYER)
-			{
-				m_timeSinceGameTurnStart.Start();
-				m_curTurnTimer.Start();
-			}
+			m_fCurrentTurnTimerPauseDelta += m_curTurnTimer.Stop();
+			m_timeSinceGameTurnStart.Stop();
+		}
+		else if(eNewValue == NO_PLAYER && m_ePausePlayer != NO_PLAYER)
+		{
+			m_timeSinceGameTurnStart.Start();
+			m_curTurnTimer.Start();
 		}
 	}
 
