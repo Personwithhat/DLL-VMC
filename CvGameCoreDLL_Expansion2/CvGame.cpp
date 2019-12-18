@@ -1483,6 +1483,7 @@ void CvGame::update()
 		{
 			sendPlayerOptions();
 
+			// Turn Stuff: This is ONLY for single-player initial autosave.
 			if(getTurnSlice() == 0 && !isPaused())
 			{
 				gDLL->AutoSave(true);
@@ -3463,6 +3464,7 @@ void CvGame::doControl(ControlTypes eControl)
 			if (!isNetworkMultiPlayer() && kActivePlayer.isHuman() && GC.GetPostTurnAutosaves())
 			{
 				gDLL->AutoSave(false, true);
+				CUSTOMLOG("Post-Turn autosave (??): %i\n", getGameTurn());
 			}
 
 #if !defined(NO_ACHIEVEMENTS)
@@ -4661,6 +4663,7 @@ int CvGame::getMaxTurnLen()
 			}
 		}
 
+		// PERSONAL TODO: I can (maybe) modify turn-timer calculations with this, tweak it to be much shorter than usual (cut in half? etc.)
 		// Now return turn len based on base len and unit and city resources
 		const CvTurnTimerInfo& kTurnTimer = CvPreGame::turnTimerInfo();
 		int baseTurnTime = (kTurnTimer.getBaseTime() +
@@ -7577,13 +7580,17 @@ void CvGame::doTurn()
 	int iLoopPlayer;
 	int iI;
 
-	if(getAIAutoPlay())
+	// AUTOSAVE_FIX
+	// In standard Civ, the multiplayer save happens at end of turn (way after sync) and causes a skipped turn/AI free moves.
+	// Moved here and works properly.
+	if(getAIAutoPlay() || isNetworkMultiPlayer())
 	{
 		gDLL->AutoSave(false);
+		CUSTOMLOG("Just autosaved - Turn %i\n", getGameTurn());
 	}
-
-	// END OF TURN
-
+//
+// ^ END OF TURN
+//
 	//We reset the turn timer now so that we know that the turn timer has been reset at least once for
 	//this turn.  CvGameController::Update() will continue to reset the timer if there is prolonged ai processing.
 	resetTurnTimer(true);
@@ -7748,11 +7755,6 @@ void CvGame::doTurn()
 	}
 
 	LogGameState();
-
-	if(isNetworkMultiPlayer())
-	{//autosave after doing a turn
-		gDLL->AutoSave(false);
-	}
 
 	gDLL->PublishNewGameTurn(getGameTurn());
 }
@@ -9680,6 +9682,8 @@ void CvGame::Read(FDataStream& kStream)
 		}
 	}
 
+	// PERSONAL TODO: Another bug? Or incomplete tweak? Since it misses gDLL->SendAICivsProcessed()
+
 	//when loading from file, we need to reset m_lastTurnAICivsProcessed 
 	//so that updateMoves() can turn active players after loading an autosave in simultaneous turns multiplayer.
 	m_lastTurnAICivsProcessed = -1;
@@ -9703,6 +9707,8 @@ void CvGame::Write(FDataStream& kStream) const
 	// Current version number
 	kStream << g_CurrentCvGameVersion;
 	MOD_SERIALIZE_INIT_WRITE(kStream);
+
+	CUSTOMLOG("We are saving the game for Turn %i", CvPreGame::gameTurn());
 
 	kStream << m_iEndTurnMessagesSent;
 	kStream << m_iElapsedGameTurns;
