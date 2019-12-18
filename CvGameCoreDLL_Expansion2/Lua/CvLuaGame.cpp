@@ -443,6 +443,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	Method(GameDoneLoading);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -3358,6 +3359,17 @@ int CvLuaGame::lIsResolutionPassed(lua_State* L)
 	const ResolutionTypes iResolutionType = static_cast<ResolutionTypes>(luaL_checkint(L, 1));
 	const int iChoice = luaL_checkint(L, 2);
 	lua_pushboolean(L, GC.getGame().IsResolutionPassed(iResolutionType, iChoice));
+	return 1;
+}
+
+int CvLuaGame::lGameDoneLoading(lua_State* L)
+{
+	CUSTOMLOG("Game is done loading!");
+
+	// Fix for freezing, withotu activating uncessary players/other turn related issues!
+	// Basically, hangs since gDLL->SendAICivsProcessed(); was not sent.
+	// Can't send it any earlier than here, will just do nothing!!
+	GC.getGame().SetLastTurnAICivsProcessed();
 	return 1;
 }
 
