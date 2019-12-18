@@ -443,6 +443,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	Method(GameDoneLoading);
 #endif
 }
 //------------------------------------------------------------------------------
@@ -3358,6 +3359,39 @@ int CvLuaGame::lIsResolutionPassed(lua_State* L)
 	const ResolutionTypes iResolutionType = static_cast<ResolutionTypes>(luaL_checkint(L, 1));
 	const int iChoice = luaL_checkint(L, 2);
 	lua_pushboolean(L, GC.getGame().IsResolutionPassed(iResolutionType, iChoice));
+	return 1;
+}
+
+int CvLuaGame::lGameDoneLoading(lua_State* L)
+{
+	CUSTOMLOG("Game is done loading!");
+	CvPlayer& kPlayer = GET_PLAYER(GC.getGame().getActivePlayer());
+
+	// Workaround to fix bugged DLL loading
+	// Game thinks that all players have sent 'Ready' as soon as you load (or initialize) a game, no apparent reason.
+	// Probably not saved/loaded and defaults to 'true' instead of 'false'
+	
+		// Workaround to allow sendTurnUnready() in most cases, would otherwise block it here!
+		bool wasActive = kPlayer.isTurnActive();
+		if(!wasActive)
+			kPlayer.setTurnActiveForPbem(true);
+
+		int count = 0;
+		while (!gDLL->sendTurnUnready() && count < 10) {
+			CUSTOMLOG("ERROR: Could not unready! :<")
+			count++;
+		}
+
+		if(!wasActive)
+			kPlayer.setTurnActiveForPbem(false);
+
+		// Workaround for loading during re-syncs, they never allow sendTurnUnready()
+		if (count < 10)
+			CUSTOMLOG("HACK: Fix DLL from thinking all players are done with turn after Loading.")
+		else
+			CUSTOMLOG("ERROR: Failed for hack to unready players. Expected when resyncing only!!!")
+	//~ workaround
+
 	return 1;
 }
 

@@ -1483,6 +1483,7 @@ void CvGame::update()
 		{
 			sendPlayerOptions();
 
+			// Turn Stuff: This is ONLY for single-player initial autosave.
 			if(getTurnSlice() == 0 && !isPaused())
 			{
 				gDLL->AutoSave(true);
@@ -3463,6 +3464,7 @@ void CvGame::doControl(ControlTypes eControl)
 			if (!isNetworkMultiPlayer() && kActivePlayer.isHuman() && GC.GetPostTurnAutosaves())
 			{
 				gDLL->AutoSave(false, true);
+				CUSTOMLOG("Post-Turn autosave (??): %i\n", getGameTurn());
 			}
 
 #if !defined(NO_ACHIEVEMENTS)
@@ -4661,6 +4663,7 @@ int CvGame::getMaxTurnLen()
 			}
 		}
 
+		// PERSONAL TODO: I can (maybe) modify turn-timer calculations with this, tweak it to be much shorter than usual (cut in half? etc.)
 		// Now return turn len based on base len and unit and city resources
 		const CvTurnTimerInfo& kTurnTimer = CvPreGame::turnTimerInfo();
 		int baseTurnTime = (kTurnTimer.getBaseTime() +
@@ -7578,12 +7581,11 @@ void CvGame::doTurn()
 	int iI;
 
 	if(getAIAutoPlay())
-	{
 		gDLL->AutoSave(false);
-	}
 
-	// END OF TURN
-
+//
+// ^ END OF TURN
+//
 	//We reset the turn timer now so that we know that the turn timer has been reset at least once for
 	//this turn.  CvGameController::Update() will continue to reset the timer if there is prolonged ai processing.
 	resetTurnTimer(true);
@@ -7637,8 +7639,12 @@ void CvGame::doTurn()
 		}
 	}
 
+//**
+//** According to VoxPop: "Old turn ends, new turn starts" here......
+//**
 	incrementGameTurn();
 	incrementElapsedGameTurns();
+	gDLL->PublishNewGameTurn(getGameTurn()); // Follow VoxPop setup as jic.
 
 	if(isOption(GAMEOPTION_DYNAMIC_TURNS))
 	{// update turn mode for dynamic turn mode.
@@ -7748,13 +7754,16 @@ void CvGame::doTurn()
 	}
 
 	LogGameState();
-
-	if(isNetworkMultiPlayer())
-	{//autosave after doing a turn
+	
+	// Autosave after turn tick's and AI is activated.
+	// NOTE: Possible desyncs from this, based on network thread stalls during autosaves?
+	// If moved above turn tick, possibility of desync (for no apparant reason) drastically increases.
+	if (isNetworkMultiPlayer())
+	{
+		CUSTOMLOG("Autosaving..... - Turn %i\n", getGameTurn());
 		gDLL->AutoSave(false);
+		CUSTOMLOG("Just autosaved - Turn %i\n", getGameTurn());
 	}
-
-	gDLL->PublishNewGameTurn(getGameTurn());
 }
 
 //	--------------------------------------------------------------------------------
@@ -9680,9 +9689,7 @@ void CvGame::Read(FDataStream& kStream)
 		}
 	}
 
-	//when loading from file, we need to reset m_lastTurnAICivsProcessed 
-	//so that updateMoves() can turn active players after loading an autosave in simultaneous turns multiplayer.
-	m_lastTurnAICivsProcessed = -1;
+	CUSTOMLOG("================ Loading game from file ================");
 }
 
 //	---------------------------------------------------------------------------
@@ -9703,6 +9710,8 @@ void CvGame::Write(FDataStream& kStream) const
 	// Current version number
 	kStream << g_CurrentCvGameVersion;
 	MOD_SERIALIZE_INIT_WRITE(kStream);
+
+	CUSTOMLOG("We are saving the game for Turn %i", CvPreGame::gameTurn());
 
 	kStream << m_iEndTurnMessagesSent;
 	kStream << m_iElapsedGameTurns;

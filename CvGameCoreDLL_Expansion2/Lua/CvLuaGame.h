@@ -94,6 +94,7 @@ protected:
 	static int lGetTurnString(lua_State* L);
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetDateString, char*, iTurn);
+	LUAAPIEXTN(GameDoneLoading, void); // Only way for DLL to know that game is done loading, afaik.
 #endif
 
 	static int lGetElapsedGameTurns(lua_State* L);

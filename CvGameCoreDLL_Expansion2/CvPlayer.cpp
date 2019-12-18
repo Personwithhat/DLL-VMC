@@ -17622,11 +17622,6 @@ void CvPlayer::setAlive(bool bNewValue, bool bNotify)
 
 			GET_TEAM(getTeam()).SetKilledByTeam(NO_TEAM);
 
-			if(isSimultaneousTurns() || (GC.getGame().getNumGameTurnActive() == 0) || (GC.getGame().isSimultaneousTeamTurns() && GET_TEAM(getTeam()).isTurnActive()))
-			{
-				setTurnActive(true);
-			}
-
 			gDLL->openSlot(GetID());
 		}
 		else
@@ -17777,7 +17772,7 @@ bool CvPlayer::isTurnActive() const
 //	--------------------------------------------------------------------------------
 void CvPlayer::setTurnActiveForPbem(bool bActive)
 {
-	CvAssertMsg(GC.getGame().isPbem(), "You are using setTurnActiveForPbem. Are you sure you know what you're doing?");
+	//CvAssertMsg(GC.getGame().isPbem(), "You are using setTurnActiveForPbem. Are you sure you know what you're doing?");
 
 	// does nothing more than to set the member variable before saving the game
 	// the rest of the turn will be performed upon loading the game
@@ -18059,21 +18054,22 @@ bool CvPlayer::isEndTurn() const
 //	------------------------------------------------------------------------------------------------
 void CvPlayer::setEndTurn(bool bNewValue)
 {
-	CvGame& game = GC.getGame();
+	CvGame& kGame = GC.getGame();
 
 	if(isSimultaneousTurns()
 		&& bNewValue 
-		&& game.isNetworkMultiPlayer() 
-		&& !gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
-	{//When doing simultaneous turns in multiplayer, we don't want anyone to end their turn until everyone has signalled TurnAllComplete.
+		&& kGame.isNetworkMultiPlayer()
+	){
+		//When doing simultaneous turns in multiplayer, we don't want anyone to end their turn until everyone has signalled TurnAllComplete.
 		// No setting end turn to true until all the players have sent the TurnComplete network message
-		return;
+		if(!gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
+			return;
 	}
 
 	// If this is a remote player in an MP match, don't
 	// honor the end of turn request if the player still
 	// has units to run the simulation for the turn
-	if(!isEndTurn() && isHuman() && GetID() != game.getActivePlayer())
+	if(!isEndTurn() && isHuman() && GetID() != kGame.getActivePlayer())
 	{
 		if(hasBusyUnitOrCity() || (!gDLL->HasReceivedTurnComplete(GetID()) && hasReadyUnit()))
 		{
@@ -18088,47 +18084,28 @@ void CvPlayer::setEndTurn(bool bNewValue)
 		}
 	}
 
-	if(isEndTurn() != bNewValue)
-	{
-		//  If the game isn't MP and the player has queued popups force him to deal with them first
-		if(!GC.getGame().isGameMultiPlayer())
-		{
-			//if (GC.GetEngineUserInterface()->isPopupQueued())
-			//{
-			//	GC.GetEngineUserInterface()->setForcePopup(true);
-			//	return;
-			//}
-			//if (GC.GetEngineUserInterface()->isDiploOrPopupWaiting())
-			//{
-			//	return;
-			//}
-		}
+	m_bEndTurn = bNewValue;
 
-		CvAssertMsg(isTurnActive(), "isTurnActive is expected to be true");
-
-		m_bEndTurn = bNewValue;
-
-		if(isEndTurn())
-		{
-			if(!GC.getGame().isOption(GAMEOPTION_DYNAMIC_TURNS) && GC.getGame().isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
-			{//fully simultaneous turns only run automoves after every human has moved.
-				checkRunAutoMovesForEveryone();
-			}
-			else
-			{
-				setAutoMoves(true);
-			}
-		}
-		else
-			setAutoMoves(false);
+	// This check is here for the AI.  Currently, the setEndTurn(true) never seems to get called for AI players, the automoves are just set directly
+	// Why is this?  It would be great if all players were processed the same.
+	if (!isHuman() && isAutoMoves()){
+		setAutoMoves(false);
 	}
 	else
-	{
-		// This check is here for the AI.  Currently, the setEndTurn(true) never seems to get called for AI players, the automoves are just set directly
-		// Why is this?  It would be great if all players were processed the same.
-		if(!bNewValue && isAutoMoves())
-			setAutoMoves(false);
+	if (isEndTurn()) {
+		CvAssertMsg(isTurnActive(), "isTurnActive is expected to be true");
+
+		//fully simultaneous turns only run automoves after every human has moved.
+		if (!kGame.isOption(GAMEOPTION_DYNAMIC_TURNS) && GC.getGame().isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
+			checkRunAutoMovesForEveryone();
+		else
+			setAutoMoves(true);
+
+	} else {
+		setAutoMoves(false);
+
 	}
+
 }
 
 //	---------------------------------------------------------------------------

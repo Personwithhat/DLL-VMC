@@ -102,6 +102,10 @@ local function OnActivateButtonClicked ()
 		Game.SetPausePlayer( -1 );
 	end
 
+	if PreGame.IsMultiplayerGame() then
+		Game.GameDoneLoading();
+	end
+
 	UI.SetDontShowPopups( false );
 
 	--UI.SetNextGameState( GameStates.MainGameView, g_iAIPlayer );
