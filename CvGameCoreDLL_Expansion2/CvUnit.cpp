@@ -23378,6 +23378,9 @@ bool CvUnit::CanDoInterfaceMode(InterfaceModeTypes eInterfaceMode, bool bTestVis
 void CvUnit::PushMission(MissionTypes eMission, int iData1, int iData2, int iFlags, bool bAppend, bool bManual, MissionAITypes eMissionAI, CvPlot* pMissionAIPlot, CvUnit* pMissionAIUnit)
 {
 	VALIDATE_OBJECT
+	// PERSONAL NOTE: Shift-move disabling.
+	// This prevents all shift-clicking, too generic of a solution though.
+	//bAppend = false;
 	CvUnitMission::PushMission(this, eMission, iData1, iData2, iFlags, bAppend, bManual, eMissionAI, pMissionAIPlot, pMissionAIUnit);
 }
 

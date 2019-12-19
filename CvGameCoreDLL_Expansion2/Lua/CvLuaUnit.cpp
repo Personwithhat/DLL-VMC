@@ -5242,6 +5242,7 @@ int CvLuaUnit::lPushMission(lua_State* L)
 	CvPlot* pkMissionAIPlot = CvLuaPlot::GetInstance(L, 9, false);
 	CvUnit* pkMissionAIUnit = CvLuaUnit::GetInstance(L, 10, false);
 
+	// PERSONAL TODO: Shift-key test, may need to trace lua files too or just set this to 'false'?
 	pkUnit->PushMission(eMission, iData1, iData2, iFlags, bAppend, bManual, eMissionAI, pkMissionAIPlot, pkMissionAIUnit);
 
 	return 0;
