@@ -246,6 +246,8 @@ BuildingTypes CvWonderProductionAI::ChooseWonder(bool bUseAsyncRandom, bool bAdj
 		{
 			CvBuildingEntry& kBuilding = *pkBuildingInfo;
 			const CvBuildingClassInfo& kBuildingClassInfo = kBuilding.GetBuildingClassInfo();
+			if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_NO_WORLD_WONDER") && isWorldWonderClass(kBuildingClassInfo))
+				continue;
 
 			// Make sure this wonder can be built now
 #if defined(MOD_AI_SMART_V3)
@@ -401,6 +403,9 @@ BuildingTypes CvWonderProductionAI::ChooseWonderForGreatEngineer(bool bUseAsyncR
 		if (pkBuildingInfo)
 		{
 			CvBuildingEntry& kBuilding = *pkBuildingInfo;
+			if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_NO_WORLD_WONDER") && isWorldWonderClass(kBuilding.GetBuildingClassInfo()))
+				continue;
+
 			// Make sure this wonder can be built now
 			if (IsWonder(kBuilding) && HaveCityToBuild((BuildingTypes)iBldgLoop))
 			{

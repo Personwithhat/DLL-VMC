@@ -911,6 +911,12 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 				}
 			}
 
+			if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_NO_WORLD_WONDER") && isWorldWonderClass(pkBuildingInfo->GetBuildingClassInfo()))
+			{
+				iTempWeight = 0;
+				continue;
+			}
+
 			// If the City is a puppet, it avoids Wonders (because the human can't change it if he wants to build it somewhere else!)
 			if(GetCity()->IsPuppet())
 			{
@@ -1161,6 +1167,9 @@ void CvCityStrategyAI::ChooseProduction(bool bUseAsyncRandom, BuildingTypes eIgn
 		// Loop through adding the available projects
 		for(iProjectLoop = 0; iProjectLoop < GC.GetGameProjects()->GetNumProjects(); iProjectLoop++)
 		{
+			if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_NO_WORLD_WONDER") && isWorldProject((ProjectTypes)iProjectLoop))
+				continue;
+
 			if(m_pCity->canCreate((ProjectTypes)iProjectLoop))
 			{
 				buildable.m_eBuildableType = CITY_BUILDABLE_PROJECT;
