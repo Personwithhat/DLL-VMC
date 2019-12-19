@@ -2589,6 +2589,11 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 	auto_ptr<ICvUnit1> pSelectedUnit(GC.GetEngineUserInterface()->GetHeadSelectedUnit());
 	CvUnit* pkSelectedUnit = GC.UnwrapUnitPointer(pSelectedUnit.get());
 
+	// PERSONAL TODO: Should never hit this, in theory.
+	if(bShift)
+		CUSTOMLOG("selectionListGameNetMessage() - SHIFT-move was true, set to false");
+	bShift = false;
+
 	if(pkSelectedUnit != NULL)
 	{
 		if(pkSelectedUnit->getOwner() == getActivePlayer() && !pSelectedUnit->IsBusy())
@@ -2977,6 +2982,7 @@ bool CvGame::canHandleAction(int iAction, CvPlot* pPlot, bool bTestVisible)
 					}
 					else if(bShift)
 					{
+						// PERSONAL TODO: Shift-move tests....not really sure what the point of this is?
 						pMissionPlot = pkHeadSelectedUnit->LastMissionPlot();
 					}
 					else

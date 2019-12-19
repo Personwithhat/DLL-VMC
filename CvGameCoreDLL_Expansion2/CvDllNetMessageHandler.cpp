@@ -738,6 +738,10 @@ void CvDllNetMessageHandler::ResponsePushMission(PlayerTypes ePlayer, int iUnitI
 
 	if(pkUnit != NULL)
 	{
+		// PERSONAL TODO: SHIFT TESTING
+		if (bShift)
+			CUSTOMLOG("ResponsePushMission() - SHIFT-move was true, set to false");
+		bShift = false;
 		pkUnit->PushMission(eMission, iData1, iData2, iFlags, bShift, true);
 	}
 
@@ -981,6 +985,11 @@ void CvDllNetMessageHandler::ResponseSwapUnits(PlayerTypes ePlayer, int iUnitID,
 
 				if(pkUnit2 && pkUnit2->AreUnitsOfSameType(*pkUnit))
 				{
+					// PERSONAL TODO: Shift-move. Looks like the shift becomes the 'Append' option for units??
+					if (bShift)
+						CUSTOMLOG("ResponseSwapUnits() - SHIFT-move was true, set to false");
+					bShift = false;
+
 					// Start the swap
 					pkUnit->PushMission(CvTypes::getMISSION_MOVE_TO(), iData1, iData2, MOVE_IGNORE_STACKING, bShift, true);
 
