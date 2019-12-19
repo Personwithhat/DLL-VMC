@@ -5400,6 +5400,14 @@ void CvDiplomacyAI::DoUpdatePeaceTreatyWillingness()
 						eTreatyWillingToAccept = PEACE_TREATY_WHITE_PEACE;
 					}
 				}
+
+				if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_ALWAYS_WHITE_PEACE") && GET_PLAYER(eLoopPlayer).isHuman())
+				{
+					if (eTreatyWillingToOffer < PEACE_TREATY_WHITE_PEACE)
+						eTreatyWillingToOffer = PEACE_TREATY_WHITE_PEACE;
+					if (eTreatyWillingToAccept != PEACE_TREATY_WHITE_PEACE)
+						eTreatyWillingToAccept = PEACE_TREATY_WHITE_PEACE;
+				}
 			}
 
 			SetTreatyWillingToOffer(eLoopPlayer, eTreatyWillingToOffer);
@@ -5414,6 +5422,9 @@ bool CvDiplomacyAI::IsWillingToMakePeaceWithHuman(PlayerTypes ePlayer)
 	CvPlayer& kHumanPlayer = GET_PLAYER(ePlayer);
 	if (kHumanPlayer.isHuman())
 	{
+		if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_ALWAYS_WHITE_PEACE"))
+			return true;
+
 #if defined(MOD_CONFIG_GAME_IN_XML)
 		bool bWillMakePeace = GetPlayerNumTurnsAtWar(ePlayer) >= GD_INT_GET(WAR_MAJOR_MINIMUM_TURNS);
 #else

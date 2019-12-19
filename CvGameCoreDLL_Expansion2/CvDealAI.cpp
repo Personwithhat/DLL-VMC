@@ -607,10 +607,13 @@ bool CvDealAI::IsDealWithHumanAcceptable(CvDeal* pDeal, PlayerTypes eOtherPlayer
 	// Peace deal where we're not surrendering, value must equal cached value
 	else if (pDeal->IsPeaceTreatyTrade(eOtherPlayer))
 	{
-		if (iTotalValueToMe >= GetCachedValueOfPeaceWithHuman())
-		{
+		int iPeaceValueRequired = GetCachedValueOfPeaceWithHuman();
+
+		if (GC.getGame().isOption("GAMEOPTION_AI_GIMP_ALWAYS_WHITE_PEACE") && iPeaceValueRequired > 0 && GET_PLAYER(eOtherPlayer).isHuman())
+			iPeaceValueRequired = 0;
+
+		if (iTotalValueToMe >= iPeaceValueRequired)
 			return true;
-		}
 	}
 
 	// If we've gotten the deal to a point where we're happy, offer it up
