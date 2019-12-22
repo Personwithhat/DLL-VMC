@@ -223,7 +223,8 @@ void CvTeam::uninit()
 		m_abDefensivePact[i] = false;
 		m_abResearchAgreement[i] = false;
 		m_abTradeAgreement[i] = false;
-		m_abForcePeace[i] = false;
+		m_abForcePeace[i] = false;			
+		m_aiTurnBoughtAlly[i] = -1;	// PERSONAL TODO: Separate into some option AND serialize this properly.
 	}
 
 	for(int i = 0; i < MAX_PLAYERS; i++)
@@ -1056,6 +1057,13 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 
 	if(GC.getGame().isOption(GAMEOPTION_ALWAYS_PEACE))
 	{
+		return false;
+	}
+
+	// PERSONAL TODO: Verify.
+	// Immediately declaring war on a player after allying their city state(s) is not allowed.
+	// The original ally of the CS must always be given one full turn to react.
+	if (GetTurnBoughtAlly(eTeam) + 1 >= GC.getGame().getGameTurn()) {
 		return false;
 	}
 
@@ -4013,6 +4021,23 @@ bool CvTeam::IsHasBrokenPeaceTreaty() const
 void CvTeam::SetHasBrokenPeaceTreaty(bool bValue)
 {
 	m_bHasBrokenPeaceTreaty = bValue;
+}
+
+//	--------------------------------------------------------------------------------
+int CvTeam::GetTurnBoughtAlly(TeamTypes eIndex) const
+{
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
+	return m_aiTurnBoughtAlly[eIndex];
+}
+
+
+//	--------------------------------------------------------------------------------
+void CvTeam::SetTurnBoughtAlly(TeamTypes eIndex, int iNewValue)
+{
+	CvAssertMsg(eIndex >= 0, "eIndex is expected to be non-negative (invalid Index)");
+	CvAssertMsg(eIndex < MAX_TEAMS, "eIndex is expected to be within maximum bounds (invalid Index)");
+	m_aiTurnBoughtAlly[eIndex] = iNewValue;
 }
 
 //	--------------------------------------------------------------------------------
