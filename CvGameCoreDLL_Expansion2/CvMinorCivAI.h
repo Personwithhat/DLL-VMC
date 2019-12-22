@@ -523,6 +523,11 @@ public:
 	int GetTurnLastBulliedByMajor(PlayerTypes ePlayer) const;
 	void SetTurnLastBulliedByMajor(PlayerTypes ePlayer, int iTurn);
 
+	int GetTurnFirstAllied(PlayerTypes ePlayer) const;
+	void SetTurnFirstAllied(PlayerTypes ePlayer, int iTurn);
+	int GetTurnLastAllied(PlayerTypes ePlayer) const;
+	void SetTurnLastAllied(PlayerTypes ePlayer, int iTurn);
+
 	// ****************
 	// *** Election ***
 	// ****************
@@ -625,6 +630,9 @@ private:
 	bool m_abPermanentWar[REALLY_MAX_TEAMS];
 	bool m_abWaryOfTeam[REALLY_MAX_TEAMS];
 	QuestListForAllPlayers m_QuestsGiven;
+
+	int m_aiTurnFirstAllied[MAX_MAJOR_CIVS];
+	int m_aiTurnLastAllied[MAX_MAJOR_CIVS];
 
 	int m_aiMajorScratchPad[MAX_MAJOR_CIVS];
 	bool m_bDisableNotifications;

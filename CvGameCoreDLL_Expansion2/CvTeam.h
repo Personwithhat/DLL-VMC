@@ -62,6 +62,9 @@ public:
 	void makePeace(TeamTypes eTeam, bool bBumpUnits = true, bool bSuppressNotification = false);
 #endif
 
+	int GetTurnBoughtAlly(TeamTypes eTeam) const;
+	void SetTurnBoughtAlly(TeamTypes eTeam, int iNewValue);
+
 	int GetTurnMadePeaceTreatyWithTeam(TeamTypes eTeam) const;
 	void SetTurnMadePeaceTreatyWithTeam(TeamTypes eTeam, int iNewValue);
 	bool IsHasBrokenPeaceTreaty() const;
@@ -523,6 +526,7 @@ protected:
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abResearchAgreement;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abTradeAgreement;
 	Firaxis::Array< bool, REALLY_MAX_TEAMS > m_abForcePeace;
+	Firaxis::Array< int, REALLY_MAX_TEAMS > m_aiTurnBoughtAlly;
 	Firaxis::Array< int, REALLY_MAX_PLAYERS > m_aiTurnTeamMet;
 
 	typedef
