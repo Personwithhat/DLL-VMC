@@ -1967,6 +1967,9 @@ void CvMinorCivAI::Reset()
 		m_abEverFriends[iI] = false;
 		m_abPledgeToProtect[iI] = false;
 		m_aiMajorScratchPad[iI] = 0;
+
+		m_aiTurnFirstAllied[iI] = -1;
+		m_aiTurnLastAllied[iI] = -1;
 	}
 
 	for(iI = 0; iI < REALLY_MAX_TEAMS; iI++)
@@ -6526,6 +6529,45 @@ void CvMinorCivAI::SetAlly(PlayerTypes eNewAlly)
 		{
 			theMap.updateDeferredFog();
 		}
+
+		int currentTurn = GC.getGame().getGameTurn();
+		if (eNewAlly != NO_PLAYER) {
+			CvPlayerAI& kCurPlayer = GET_PLAYER(eNewAlly);
+			CvTeam* pNotifyTeam    = &GET_TEAM(kCurPlayer.getTeam());
+
+			// Check if we were the Original Owner
+			if (m_aiTurnFirstAllied[eNewAlly] != -1 &&				// Were allied at some point in time with this CS
+				currentTurn - m_aiTurnFirstAllied[eNewAlly] >= 1 && // Owned CS for at least 1 full turn after buying
+				currentTurn - m_aiTurnLastAllied[eNewAlly] < 1		// and just lost ally status recently.
+			){
+				CUSTOMLOG("SetAlly() - Turn %d: %s took back ally status from %s",
+					GC.getGame().getGameTurn(),
+					GET_PLAYER(eNewAlly).getCivilizationShortDescriptionKey(),
+					GET_PLAYER(eOldAlly).getCivilizationShortDescriptionKey()
+				);
+				// Don't update first-allied time!
+				//m_aiTurnFirstAllied[eNewAlly] = GC.getGame().getGameTurn();
+
+			}else{
+				// Otherwise we took a new CS ally from someone else, can't declare war for 1 turn vs them.
+				pNotifyTeam->SetTurnBoughtAlly(GET_PLAYER(eOldAlly).getTeam(), currentTurn);
+				CUSTOMLOG("SetAlly() - Turn %d: %s was replaced by %s as Ally.",
+					currentTurn,
+					GET_PLAYER(eOldAlly).getCivilizationShortDescriptionKey(),
+					GET_PLAYER(eNewAlly).getCivilizationShortDescriptionKey()
+				);
+
+				// Update that we just-allied.
+				m_aiTurnFirstAllied[eNewAlly] = currentTurn;
+			}
+		}
+
+		// Last turn that you were an ally.
+		m_aiTurnLastAllied[eOldAlly] = currentTurn;
+
+	} else {
+		// When we freshly ally a CS need to update too.
+		m_aiTurnFirstAllied[eNewAlly] = GC.getGame().getGameTurn();
 	}
 
 	m_eAlly = eNewAlly;
@@ -9657,6 +9699,41 @@ void CvMinorCivAI::SetTurnLastBulliedByMajor(PlayerTypes ePlayer, int iTurn)
 	m_aiTurnLastBullied[ePlayer] = iTurn;
 }
 
+int CvMinorCivAI::GetTurnFirstAllied(PlayerTypes ePlayer) const
+{
+	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS) return -1;
+
+	return m_aiTurnFirstAllied[ePlayer];
+}
+
+void CvMinorCivAI::SetTurnFirstAllied(PlayerTypes ePlayer, int iTurn)
+{
+	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS) return;
+
+	m_aiTurnFirstAllied[ePlayer] = iTurn;
+}
+
+int CvMinorCivAI::GetTurnLastAllied(PlayerTypes ePlayer) const
+{
+	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS) return -1;
+
+	return m_aiTurnLastAllied[ePlayer];
+}
+
+void CvMinorCivAI::SetTurnLastAllied(PlayerTypes ePlayer, int iTurn)
+{
+	CvAssertMsg(ePlayer >= 0, "ePlayer is expected to be non-negative (invalid Index)");
+	CvAssertMsg(ePlayer < MAX_MAJOR_CIVS, "ePlayer is expected to be within maximum bounds (invalid Index)");
+	if (ePlayer < 0 || ePlayer >= MAX_MAJOR_CIVS) return;
+
+	m_aiTurnLastAllied[ePlayer] = iTurn;
+}
 // ****************
 // *** Election ***
 // ****************
