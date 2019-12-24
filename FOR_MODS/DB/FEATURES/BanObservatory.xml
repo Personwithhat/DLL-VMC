@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<GameData>
+	<GameOptions>
+		<Row>
+			<Type>GAMEOPTION_BAN_OBSERVATORY</Type>
+			<Description>TXT_KEY_GAMEOPTION_BAN_OBSERVATORY</Description>
+			<Help>TXT_KEY_GAMEOPTION_BAN_OBSERVATORY_HELP</Help>
+		</Row>
+	</GameOptions>
+	<Language_en_US>
+		<Row Tag="TXT_KEY_GAMEOPTION_BAN_OBSERVATORY">
+			<Text>Ban Observatories</Text>
+		</Row>
+		<Row Tag="TXT_KEY_GAMEOPTION_BAN_OBSERVATORY_HELP">
+			<Text>Ban building of observatories in any city.</Text>
+		</Row>
+	</Language_en_US>
+</GameData>

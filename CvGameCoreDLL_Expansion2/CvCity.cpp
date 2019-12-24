@@ -15784,6 +15784,9 @@ bool CvCity::isValidBuildingLocation(BuildingTypes eBuilding) const
 	// Requires adjacent Mountain
 	if(pkBuildingInfo->IsMountain())
 	{
+		if (GC.getGame().isOption("GAMEOPTION_BAN_OBSERVATORY") && strcmp(pkBuildingInfo->GetType(), "BUILDING_OBSERVATORY") == 0)
+			return false;
+
 		bool bFoundMountain = false;
 
 		CvPlot* pAdjacentPlot;
