@@ -1562,6 +1562,34 @@ void CvGame::update()
 //	and all activity has been completed.
 void CvGame::CheckPlayerTurnDeactivate()
 {
+	bool pendingAI = false;
+	for (int iI = 0; iI < MAX_PLAYERS; iI++)
+	{
+		CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
+		if (player.isAlive() && player.isTurnActive() && !player.isHuman())
+		{
+			pendingAI = true;
+			break;
+		}
+	}
+
+	bool activatePlayers = !pendingAI && m_lastTurnAICivsProcessed != getGameTurn();
+	if (activatePlayers)
+	{
+		SetLastTurnAICivsProcessed();
+		if (isOption(GAMEOPTION_DYNAMIC_TURNS) || isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
+		{//Activate human players who are playing simultaneous turns now that we've finished moves for the AI.
+			for (int iI = 0; iI < MAX_PLAYERS; iI++)
+			{
+				CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
+				if (!player.isTurnActive() && player.isHuman() && player.isAlive() && player.isSimultaneousTurns())
+				{
+					player.setTurnActive(true);
+				}
+			}
+		}
+	}
+
 	for(int iI = 0; iI < MAX_PLAYERS; iI++)
 	{
 		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
@@ -8283,7 +8311,6 @@ void CvGame::updateMoves()
 	// If no AI with an active turn, check humans.
 	if(playersToProcess.empty())
 	{
-		SetLastTurnAICivsProcessed();
 		if(gDLL->allAICivsProcessedThisTurn())
 		{//everyone is finished processing the AI civs.
 			PlayerTypes eActivePlayer = getActivePlayer();
@@ -8536,22 +8563,6 @@ void CvGame::updateMoves()
 							player.setEndTurn(true);
 						}
 					}
-				}
-			}
-		}
-	}
-
-	if(activatePlayers)
-	{
-		if (isOption(GAMEOPTION_DYNAMIC_TURNS) || isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
-		{//Activate human players who are playing simultaneous turns now that we've finished moves for the AI.
-			// KWG: This code should go into CheckPlayerTurnDeactivate
-			for(iI = 0; iI < MAX_PLAYERS; iI++)
-			{
-				CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
-				if(!player.isTurnActive() && player.isHuman() && player.isAlive() && player.isSimultaneousTurns())
-				{
-					player.setTurnActive(true);
 				}
 			}
 		}
