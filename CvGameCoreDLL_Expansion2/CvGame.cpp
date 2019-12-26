@@ -1584,6 +1584,11 @@ void CvGame::CheckPlayerTurnDeactivate()
 				CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
 				if (!player.isTurnActive() && player.isHuman() && player.isAlive() && player.isSimultaneousTurns())
 				{
+					// Only send event for local-player (once)
+					if (getActivePlayer() == player.GetID()) {
+						CUSTOMLOG("Sending WorldTurnStart event");
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_WorldTurnStart);
+					}
 					player.setTurnActive(true);
 				}
 			}

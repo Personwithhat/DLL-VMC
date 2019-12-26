@@ -18064,10 +18064,15 @@ void CvPlayer::setEndTurn(bool bNewValue)
 	if(isSimultaneousTurns()
 		&& bNewValue 
 		&& game.isNetworkMultiPlayer() 
-		&& !gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
-	{//When doing simultaneous turns in multiplayer, we don't want anyone to end their turn until everyone has signalled TurnAllComplete.
+	){
+		//When doing simultaneous turns in multiplayer, we don't want anyone to end their turn until everyone has signalled TurnAllComplete.
 		// No setting end turn to true until all the players have sent the TurnComplete network message
-		return;
+		if(!gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
+			return;
+		else if(CvPreGame::activePlayer() == GetID()){
+			CUSTOMLOG("Sending WorldTurnEnd event");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_WorldTurnEnd);
+		}
 	}
 
 	// If this is a remote player in an MP match, don't

@@ -1066,7 +1066,8 @@ enum BattleTypeTypes
 #define GAMEEVENT_UnitPromoted					"UnitPromoted",					"iii"
 #define GAMEEVENT_UnitRangeAttackAt				"UnitRangeAttackAt",			"iiii"
 #define GAMEEVENT_UnitUpgraded					"UnitUpgraded",					"iiib"
-
+#define GAMEEVENT_WorldTurnStart				"WorldTurnStart",				""
+#define GAMEEVENT_WorldTurnEnd					"WorldTurnEnd",					""
 
 // Serialization wrappers
 #define MOD_SERIALIZE

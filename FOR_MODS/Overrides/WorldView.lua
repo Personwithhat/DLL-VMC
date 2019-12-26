@@ -14,6 +14,10 @@ local bEatNextUp = false;
 local pathBorderStyle = "MovementRangeBorder";
 local attackPathBorderStyle = "AMRBorder"; -- attack move
          
+-- PERSONAL NOTE: Handling last-second moves or moves during turn-transition, by blocking inputs.
+-- Make sure to import this file into VFS if you want this feature active. What folder it's in doesn't matter, just the name.
+local bBlockInput = false;
+
 function UpdatePathFromSelectedUnitToMouse()
 	local interfaceMode = UI.GetInterfaceMode();
 	--Events.ClearHexHighlightStyle(pathBorderStyle);
@@ -338,6 +342,11 @@ function( wParam, lParam )
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return true;
 	elseif (wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 ) then
+		
+		if bBlockInput == true then
+			return;
+		end
+
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return DefaultMessageHandler[KeyEvents.KeyDown]( wParam, lParam );
 	else
@@ -352,6 +361,11 @@ function( wParam, lParam )
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return true;
 	elseif (wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 ) then
+		
+		if bBlockInput == true then
+			return;
+		end
+
 		UI.ClearSelectedCities();
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return DefaultMessageHandler[KeyEvents.KeyDown]( wParam, lParam );
@@ -362,6 +376,11 @@ end
 
 -- this is a default handler for all Interface Modes that correspond to a mission
 function missionTypeLButtonUpHandler( wParam, lParam )
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	if plot then
 		local plotX = plot:GetX();
@@ -407,6 +426,11 @@ end
 
 
 function AirStrike( wParam, lParam )
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -455,6 +479,11 @@ end
 
 
 function RangeAttack( wParam, lParam )
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -542,6 +571,11 @@ function ( wParam, lParam )
 end
 
 function EmbarkInputHandler( wParam, lParam )
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -565,6 +599,11 @@ if (UI.IsTouchScreenEnabled()) then
 end
 
 function DisembarkInputHandler( wParam, lParam )
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -612,6 +651,10 @@ end
 
 InterfaceModeMessageHandler[InterfaceModeTypes.INTERFACEMODE_SELECTION][MouseEvents.RButtonDown] = 
 function( wParam, lParam )
+	if bBlockInput == true then
+		return;
+	end
+	
 	ShowMovementRangeIndicator();
 	UI.SendPathfinderUpdate();
 	UpdatePathFromSelectedUnitToMouse();
@@ -640,7 +683,12 @@ end
 
 
 function MovementRButtonUp( wParam, lParam )
-    if( bEatNextUp == true ) then
+	
+	if bBlockInput == true then
+		return;
+	end
+
+	if( bEatNextUp == true ) then
         bEatNextUp = false;
         return;
     end
@@ -790,6 +838,12 @@ function InputHandler( uiMsg, wParam, lParam )
 	elseif uiMsg == MouseEvents.RButtonUp then
 		rButtonDown = false;
 	end
+
+	if bBlockInput then
+		rButtonDown = false;
+		return;
+	end
+
 	if( UI.IsTouchScreenEnabled() and uiMsg == MouseEvents.PointerDown ) then
 	    if( UIManager:GetNumPointers() > 1 ) then
 			UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
@@ -892,3 +946,22 @@ function OnMultiplayerGameLastPlayer()
 	Text = "TXT_KEY_MP_LAST_PLAYER" } );
 end
 Events.MultiplayerGameLastPlayer.Add( OnMultiplayerGameLastPlayer );
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Additions to handle last-second moves
+-----------------------------------------------------
+function OnWorldTurnEnd()
+	bBlockInput = true;
+	rButtonDown = false;
+	ClearAllHighlights();
+	Events.DisplayMovementIndicator( false );
+end
+function OnWorldTurnStart()
+	bBlockInput = false;
+end
+GameEvents.WorldTurnStart.Add( OnWorldTurnStart );
+GameEvents.WorldTurnEnd.Add( OnWorldTurnEnd );
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
