@@ -42,6 +42,10 @@ local bEatNextUp = false;
 
 local pathBorderStyle = "MovementRangeBorder";
 local attackPathBorderStyle = "AMRBorder"; -- attack move
+         
+-- PERSONAL NOTE: Handling last-second moves or moves during turn-transition, by blocking inputs.
+-- Make sure to import this file into VFS if you want this feature active. What folder it's in doesn't matter, just the name.
+local bBlockInput = false;
 
 function UpdatePathFromSelectedUnitToMouse()
 	local interfaceMode = UI.GetInterfaceMode();
@@ -366,6 +370,11 @@ function( wParam, lParam )
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return true;
 	elseif wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 then
+		
+		if bBlockInput == true then
+			return;
+		end
+
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return DefaultMessageHandler[KeyEvents.KeyDown]( wParam, lParam );
 	else
@@ -380,6 +389,11 @@ function( wParam, lParam )
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return true;
 	elseif wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 then
+		
+		if bBlockInput == true then
+			return;
+		end
+
 		UI.ClearSelectedCities();
 		UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
 		return DefaultMessageHandler[KeyEvents.KeyDown]( wParam, lParam );
@@ -390,7 +404,12 @@ end
 
 -- this is a default handler for all Interface Modes that correspond to a mission
 function missionTypeLButtonUpHandler()
-	local plot = Map.GetPlot( UI.GetMouseOverHex() )
+
+	if bBlockInput == true then
+		return;
+	end
+
+	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	if plot then
 		local interfaceMode = UI.GetInterfaceMode()
 		if UI.CanDoInterfaceMode(interfaceMode) then
@@ -430,6 +449,11 @@ end
 
 
 function AirStrike()
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -477,6 +501,11 @@ end
 
 
 function RangeAttack()
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -562,6 +591,11 @@ function ()
 end
 
 function EmbarkInputHandler()
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -585,6 +619,11 @@ if UI.IsTouchScreenEnabled() then
 end
 
 function DisembarkInputHandler()
+
+	if bBlockInput == true then
+		return;
+	end
+
 	local plot = Map.GetPlot( UI.GetMouseOverHex() );
 	local plotX = plot:GetX();
 	local plotY = plot:GetY();
@@ -632,6 +671,10 @@ end
 
 InterfaceModeMessageHandler[InterfaceModeTypes.INTERFACEMODE_SELECTION][MouseEvents.RButtonDown] =
 function()
+	if bBlockInput == true then
+		return;
+	end
+	
 	ShowMovementRangeIndicator();
 	UI.SendPathfinderUpdate();
 	UpdatePathFromSelectedUnitToMouse();
@@ -659,6 +702,10 @@ function ClearAllHighlights()
 end
 
 function MovementRButtonUp()
+	if bBlockInput == true then
+		return;
+	end
+
 	if bEatNextUp == true then
 		bEatNextUp = false;
 		return;
@@ -822,6 +869,12 @@ function InputHandler( uiMsg, wParam, lParam )
 	elseif uiMsg == MouseEvents.RButtonUp then
 		rButtonDown = false;
 	end
+
+	if bBlockInput then
+		rButtonDown = false;
+		return;
+	end
+
 	if UI.IsTouchScreenEnabled() and uiMsg == MouseEvents.PointerDown then
 		if UIManager:GetNumPointers() > 1 then
 			UI.SetInterfaceMode(InterfaceModeTypes.INTERFACEMODE_SELECTION);
@@ -918,3 +971,22 @@ function OnMultiplayerGameLastPlayer()
 	Text = "TXT_KEY_MP_LAST_PLAYER" } );
 end
 Events.MultiplayerGameLastPlayer.Add( OnMultiplayerGameLastPlayer );
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Allows DLL to enable/disable input. Not accessible in C++ code unfortunately.
+-----------------------------------------------------
+function OnDisableInput()
+	bBlockInput = true;
+	rButtonDown = false;
+	ClearAllHighlights();
+	Events.DisplayMovementIndicator( false );
+end
+function OnEnableInput()
+	bBlockInput = false;
+end
+GameEvents.EnableInput.Add( OnEnableInput );
+GameEvents.DisableInput.Add( OnDisableInput );
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
