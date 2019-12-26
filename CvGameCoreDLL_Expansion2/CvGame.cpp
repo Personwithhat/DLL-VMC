@@ -3651,6 +3651,10 @@ void CvGame::doControl(ControlTypes eControl)
 		CvPopupInfo kPopup(BUTTONPOPUP_NOTIFICATION_LOG, getActivePlayer());
 		kPopup.iData1 = 1;
 		GC.GetEngineUserInterface()->AddPopup(kPopup);
+
+		// PERSONAL NOTE: HACK! So host can reset timer.
+		if(gDLL->IsHost())
+			resetTurnTimer(true);
 	}
 	break;
 
