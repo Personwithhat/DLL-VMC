@@ -1586,6 +1586,7 @@ void CvGame::CheckPlayerTurnDeactivate()
 				{
 					// Only send event for local-player (once)
 					if (getActivePlayer() == player.GetID()) {
+						resetTurnTimer(true);
 						CUSTOMLOG("Sending WorldTurnStart event");
 						GAMEEVENTINVOKE_HOOK(GAMEEVENT_WorldTurnStart);
 					}
@@ -1915,7 +1916,8 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 		{
 			if(isLocalPlayer && (!gDLL->allAICivsProcessedThisTurn() || !allUnitAIProcessed()))
 			{//the turn timer doesn't doesn't start until all ai processing has been completed for this game turn.
-				resetTurnTimer(true);
+				if (!isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
+					resetTurnTimer(true);
 
 				//hold the turn timer at 0 seconds with 0% completion
 				CvPreGame::setEndTurnTimerLength(0.0f);
@@ -1995,6 +1997,7 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 			}
 		}
 		else if(isLocalPlayer){
+			// For initial Turn 0 timer, keep timer off.
 			//hold the turn timer at 0 seconds with 0% completion
 			CvPreGame::setEndTurnTimerLength(0.0f);
 			iface->updateEndTurnTimer(0.0f);
@@ -7623,7 +7626,8 @@ void CvGame::doTurn()
 //
 	//We reset the turn timer now so that we know that the turn timer has been reset at least once for
 	//this turn.  CvGameController::Update() will continue to reset the timer if there is prolonged ai processing.
-	resetTurnTimer(true);
+	if (!isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
+		resetTurnTimer(true);;
 
 	// If player unit cycling has been canceled for this turn, set it back to normal for the next
 	GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
