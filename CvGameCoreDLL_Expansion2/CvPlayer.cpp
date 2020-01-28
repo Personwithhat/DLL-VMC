@@ -14954,7 +14954,8 @@ void CvPlayer::DoGreatPeopleSpawnTurn()
 
 			if(eBestMinor != NO_PLAYER)
 #if defined(MOD_GLOBAL_TRULY_FREE_GP)
-				DoSpawnGreatPerson(eBestMinor, MOD_GLOBAL_TRULY_FREE_GP);
+				// PERSONAL NOTE: We want patronage finisher to be truly free :) 
+				DoSpawnGreatPerson(eBestMinor, true); // MOD_GLOBAL_TRULY_FREE_GP);
 #else
 				DoSpawnGreatPerson(eBestMinor);
 #endif
