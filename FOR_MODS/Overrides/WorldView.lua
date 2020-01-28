@@ -16,7 +16,7 @@ local attackPathBorderStyle = "AMRBorder"; -- attack move
          
 -- PERSONAL NOTE: Handling last-second moves or moves during turn-transition, by blocking inputs.
 -- Make sure to import this file into VFS if you want this feature active. What folder it's in doesn't matter, just the name.
-local bBlockInput = false;
+local bBlockInput = 0;
 
 function UpdatePathFromSelectedUnitToMouse()
 	local interfaceMode = UI.GetInterfaceMode();
@@ -343,7 +343,7 @@ function( wParam, lParam )
 		return true;
 	elseif (wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 ) then
 		
-		if bBlockInput == true then
+		if bBlockInput > 0 then
 			return;
 		end
 
@@ -362,7 +362,7 @@ function( wParam, lParam )
 		return true;
 	elseif (wParam == Keys.VK_NUMPAD1 or wParam == Keys.VK_NUMPAD3 or wParam == Keys.VK_NUMPAD4 or wParam == Keys.VK_NUMPAD6 or wParam == Keys.VK_NUMPAD7 or wParam == Keys.VK_NUMPAD8 ) then
 		
-		if bBlockInput == true then
+		if bBlockInput > 0 then
 			return;
 		end
 
@@ -377,7 +377,7 @@ end
 -- this is a default handler for all Interface Modes that correspond to a mission
 function missionTypeLButtonUpHandler( wParam, lParam )
 
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -427,7 +427,7 @@ end
 
 function AirStrike( wParam, lParam )
 
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -480,7 +480,7 @@ end
 
 function RangeAttack( wParam, lParam )
 
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -572,7 +572,7 @@ end
 
 function EmbarkInputHandler( wParam, lParam )
 
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -600,7 +600,7 @@ end
 
 function DisembarkInputHandler( wParam, lParam )
 
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -651,7 +651,7 @@ end
 
 InterfaceModeMessageHandler[InterfaceModeTypes.INTERFACEMODE_SELECTION][MouseEvents.RButtonDown] = 
 function( wParam, lParam )
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 	
@@ -684,7 +684,7 @@ end
 
 function MovementRButtonUp( wParam, lParam )
 	
-	if bBlockInput == true then
+	if bBlockInput > 0 then
 		return;
 	end
 
@@ -839,7 +839,7 @@ function InputHandler( uiMsg, wParam, lParam )
 		rButtonDown = false;
 	end
 
-	if bBlockInput then
+	if bBlockInput > 0 then
 		rButtonDown = false;
 		return;
 	end
@@ -952,13 +952,15 @@ Events.MultiplayerGameLastPlayer.Add( OnMultiplayerGameLastPlayer );
 -- Allows DLL to enable/disable input. Not accessible in C++ code unfortunately.
 -----------------------------------------------------
 function OnDisableInput()
-	bBlockInput = true;
+	bBlockInput = bBlockInput + 1;
 	rButtonDown = false;
 	ClearAllHighlights();
 	Events.DisplayMovementIndicator( false );
+	print("DisabledInput. Current: " .. tostring(bBlockInput));
 end
 function OnEnableInput()
-	bBlockInput = false;
+	bBlockInput = bBlockInput - 1;
+	print("EnabledInput. Current: " .. tostring(bBlockInput));
 end
 GameEvents.EnableInput.Add( OnEnableInput );
 GameEvents.DisableInput.Add( OnDisableInput );

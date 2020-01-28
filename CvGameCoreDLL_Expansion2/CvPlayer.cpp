@@ -27722,6 +27722,14 @@ void CvPlayer::disconnected()
 				}
 			}
 
+		// PERSONAL TODO: 
+		// Applies to both kicks and disconnects atm to reduce human error
+		// Not sure if this matters, egh. Only for simultaneous turn-mode.
+		if(isSimultaneousTurns() && !isObserver()){
+			CUSTOMLOG("A player has disconnected: Disabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
+		}
+
 		if(!isObserver() && (!CvPreGame::isPitBoss() || gDLL->IsPlayerKicked(GetID())))
 		{
 			// JAR : First pass, automatically fall back to CPU so the
@@ -27765,6 +27773,11 @@ void CvPlayer::reconnected()
 		if(pNotifications)
 		{
 			pNotifications->Add(NOTIFICATION_PLAYER_CONNECTING, connectString.toUTF8(), connectString.toUTF8(), -1, -1, GetID());
+		}
+
+		if (isSimultaneousTurns() && CvPreGame::slotStatus(GetID()) != SS_OBSERVER) {
+			CUSTOMLOG("A player is reconnecting: Enabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 		}
 	}
 }
