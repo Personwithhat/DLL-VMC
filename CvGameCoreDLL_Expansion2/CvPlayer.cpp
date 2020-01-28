@@ -18071,8 +18071,8 @@ void CvPlayer::setEndTurn(bool bNewValue)
 		if(!gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
 			return;
 		else if(CvPreGame::activePlayer() == GetID()){
-			CUSTOMLOG("Sending WorldTurnEnd event");
-			GAMEEVENTINVOKE_HOOK(GAMEEVENT_WorldTurnEnd);
+			CUSTOMLOG("World Turn ended: Disabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
 		}
 	}
 

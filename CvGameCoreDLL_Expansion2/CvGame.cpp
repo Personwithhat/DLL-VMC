@@ -1587,8 +1587,8 @@ void CvGame::CheckPlayerTurnDeactivate()
 					// Only send event for local-player (once)
 					if (getActivePlayer() == player.GetID()) {
 						resetTurnTimer(true);
-						CUSTOMLOG("Sending WorldTurnStart event");
-						GAMEEVENTINVOKE_HOOK(GAMEEVENT_WorldTurnStart);
+						CUSTOMLOG("World turn started: Enabling Input");
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 					}
 					player.setTurnActive(true);
 				}

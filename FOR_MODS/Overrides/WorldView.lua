@@ -949,19 +949,19 @@ Events.MultiplayerGameLastPlayer.Add( OnMultiplayerGameLastPlayer );
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
--- Additions to handle last-second moves
+-- Allows DLL to enable/disable input. Not accessible in C++ code unfortunately.
 -----------------------------------------------------
-function OnWorldTurnEnd()
+function OnDisableInput()
 	bBlockInput = true;
 	rButtonDown = false;
 	ClearAllHighlights();
 	Events.DisplayMovementIndicator( false );
 end
-function OnWorldTurnStart()
+function OnEnableInput()
 	bBlockInput = false;
 end
-GameEvents.WorldTurnStart.Add( OnWorldTurnStart );
-GameEvents.WorldTurnEnd.Add( OnWorldTurnEnd );
+GameEvents.EnableInput.Add( OnEnableInput );
+GameEvents.DisableInput.Add( OnDisableInput );
 
 --------------------------------------------------------------------------------
 --------------------------------------------------------------------------------
