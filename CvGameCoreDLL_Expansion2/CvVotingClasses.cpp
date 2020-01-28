@@ -2229,6 +2229,12 @@ void CvLeague::DoVoteEnact(int iID, PlayerTypes eVoter, int iNumVotes, int iChoi
 		{
 			if (it->GetID() == iID)
 			{
+				// PERSONAL NOTE: You may only vote for yourself if it's a diplomatic victory vote.
+				if (it->GetEffects()->bDiplomaticVictory){
+					iChoice = (int)eVoter;
+					iNumVotes = GetMember(eVoter)->iVotes;
+				}
+
 				it->GetVoterDecision()->ProcessVote(eVoter, iNumVotes, iChoice);
 				GetMember(eVoter)->iVotes -= iNumVotes;
 				CvAssertMsg(GetRemainingVotesForMember(eVoter) >= 0, "A voter now has negative votes remaining. Please send Anton your save file and version.");
