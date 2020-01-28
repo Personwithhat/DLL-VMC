@@ -1050,6 +1050,26 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 		return false;
 	}
 
+	// Can't declare war on CS if we are allied with a Major power that is also allied with this CS
+	for (int iI = MAX_MAJOR_CIVS; iI < MAX_PLAYERS; iI++)
+	{
+		// Check if team is a Minor Civ
+		CvPlayer& kPlayer = GET_PLAYER((PlayerTypes)iI);
+		if (kPlayer.isAlive() && kPlayer.getTeam() == GET_TEAM(eTeam).GetID())
+		{
+			if (!kPlayer.isMinorCiv())
+				break;
+
+			// Get minor Civ's ally
+			PlayerTypes alliedPlayer = kPlayer.GetMinorCivAI()->GetAlly();
+			TeamTypes alliedTeam = GET_PLAYER(alliedPlayer).getTeam();
+
+			// Are we in a peace-treaty with CS ally?
+			if (isForcePeace(alliedTeam))
+				return false;
+		}
+	}
+
 	if(!canChangeWarPeace(eTeam))
 	{
 		return false;
@@ -1650,6 +1670,26 @@ void CvTeam::DoMakePeace(TeamTypes eTeam, bool bBumpUnits, bool bSuppressNotific
 
 		if(!isMinorCiv())
 		{
+			// Made peace with Major
+			if (!GET_TEAM(eTeamWeMadePeaceWith).isMinorCiv())
+			{
+				// Make peace with all minors allied with major
+				for (int iMinorCivLoop = MAX_MAJOR_CIVS; iMinorCivLoop < MAX_CIV_PLAYERS; iMinorCivLoop++)
+				{
+					// Get minor Civ's ally
+					CvPlayer& minorCiv = GET_PLAYER((PlayerTypes)iI);
+					PlayerTypes alliedPlayer = minorCiv.GetMinorCivAI()->GetAlly();
+					TeamTypes alliedTeam = GET_PLAYER(alliedPlayer).getTeam();
+
+					// Check if we just peaced the minor's ally
+					if (minorCiv.isAlive() && alliedTeam == eTeamWeMadePeaceWith)
+					{
+						GET_TEAM(minorCiv.getTeam()).DoMakePeace((PlayerTypes)iI, bPacifier, GetID(), /*bBumpUnits*/ true, /*bSuppressNotification*/ true);
+					}
+				}
+				// PERSONAL TODO: Send notifications (if needed) that these civs all made peace......
+			}
+
 			// Made peace with a minor - see if we have allied minors which should also make peace
 			if(GET_TEAM(eTeamWeMadePeaceWith).isMinorCiv())
 			{
