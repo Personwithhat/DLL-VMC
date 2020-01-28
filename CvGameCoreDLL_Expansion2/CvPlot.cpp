@@ -2455,7 +2455,9 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 	CvBuildInfo& thisBuildInfo = *GC.getBuildInfo(eBuild);
 	if(thisBuildInfo.isRepair())
 	{
-		if(IsImprovementPillaged() || IsRoutePillaged())
+		// Can only repair improvements outside of other player's lands.
+		bool inEnemyLands = (getTeam() != eTeam && getTeam() != NO_TEAM);
+		if((IsImprovementPillaged() && !inEnemyLands) || IsRoutePillaged())
 		{
 			bValid = true;
 		}
