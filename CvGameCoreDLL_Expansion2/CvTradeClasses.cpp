@@ -3386,8 +3386,9 @@ bool CvPlayerTrade::PlunderTradeRoute(int iTradeConnectionID)
 		DLLUI->AddMessage(0, m_pPlayer->GetID(), true, GC.getEVENT_MESSAGE_TIME(), strBuffer);
 	}
 
+	// PERSONAL NOTE: Disabled to avoid triple trireme spawn 'bug'. Community annoyed so there ya go.
 	// barbarians get a bonus unit out of the deal!
-	if (m_pPlayer->isBarbarian() && pPlot)
+	/*if (m_pPlayer->isBarbarian() && pPlot)
 	{
 		int iLoop = 0;
 		for(CvUnit* pLoopUnit = m_pPlayer->firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = m_pPlayer->nextUnit(&iLoop))
@@ -3399,6 +3400,7 @@ bool CvPlayerTrade::PlunderTradeRoute(int iTradeConnectionID)
 			}
 		}
 	}
+	*/
 
 	// do the notification stuff
 	if (pOriginCity && pDestCity)
