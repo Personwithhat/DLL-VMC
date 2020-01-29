@@ -7715,9 +7715,7 @@ void CvGame::doTurn()
 			// updateMoves
 			if(player.isAlive() && !player.isHuman())
 			{
-				// PERSONAL TODO: Make sure this works properly.
-				// Basically, never set any AI as active! .-.
-				//player.setTurnActive(true);
+				player.setTurnActive(true);
 			}
 		}
 	}
