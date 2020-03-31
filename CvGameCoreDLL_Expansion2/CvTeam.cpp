@@ -1060,11 +1060,13 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 			if (!kPlayer.isMinorCiv())
 				break;
 
-			// Get minor Civ's ally
+			// Get minor Civ's ally, if any.
 			PlayerTypes alliedPlayer = kPlayer.GetMinorCivAI()->GetAlly();
-			TeamTypes alliedTeam = GET_PLAYER(alliedPlayer).getTeam();
+			if (alliedPlayer == NO_PLAYER)
+				break;
 
 			// Are we in a peace-treaty with CS ally?
+			TeamTypes alliedTeam = GET_PLAYER(alliedPlayer).getTeam();
 			if (isForcePeace(alliedTeam))
 				return false;
 		}
