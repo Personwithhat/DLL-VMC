@@ -17952,7 +17952,13 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			CvAssertFmt(GetEndTurnBlockingType() == NO_ENDTURN_BLOCKING_TYPE, "Expecting the end-turn blocking to be NO_ENDTURN_BLOCKING_TYPE, got %d", GetEndTurnBlockingType());
 			SetEndTurnBlocking(NO_ENDTURN_BLOCKING_TYPE, -1);	// Make sure this is clear so the UI doesn't block when it is not our turn.
 
+#ifdef MOD_WAR_PHASE
+			// Handled elsewhere for players.
+			if (!isHuman())
+				DoUnitReset();
+#else
 			DoUnitReset();
+#endif
 
 			if(!isHuman())
 			{

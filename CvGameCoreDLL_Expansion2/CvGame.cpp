@@ -1504,107 +1504,56 @@ void CvGame::update()
 #else
 				if (gDLL->CanAdvanceTurn()) {
 					CUSTOMLOG("========= Can advance turn =========");
-
-					// TEMP-HACK?
-					if (getGameTurn() == 0)
+					if (!m_bWarPhase)
 						doTurn();
 					else {
-						if (!m_bWarPhase)
-							doTurn();
-						else {
-							// TODO: Which one of these should run/not-run?
-							// Obfuscated DLL stuff.
-							gDLL->DoTurn();
+					//***
+					//*** Minimal doTurn(). TODO: Remove any that are unecessary?
+					//***
+						// Obfuscated DLL stuff.
+						gDLL->DoTurn();
+						GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
+						GC.GetEngineUserInterface()->doTurn();
+						GC.GetEngineUserInterface()->setCanEndTurn(false);
+						GC.GetEngineUserInterface()->setHasMovedUnit(false);
 
-							// If player unit cycling has been canceled for this turn, set it back to normal for the next
-							GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
-							GC.GetEngineUserInterface()->doTurn();
-							GC.GetEngineUserInterface()->setCanEndTurn(false);
-							GC.GetEngineUserInterface()->setHasMovedUnit(false);
-
-							// incrementGameTurn() -> setGameTurn()
-							{
-								std::string turnMessage = std::string("Game Turn ") + FSerialization::toString(getGameTurn()) + std::string(" - war_phase \n");
-								gDLL->netMessageDebugLog(turnMessage);
-
-								//CvPreGame::setGameTurn(iNewValue);
-								CvAssert(getGameTurn() >= 0);
-
-								//setScoreDirty(true);
-
-								GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
-								//GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
-								m_sentAutoMoves = false;
-								gDLL->GameplayTurnChanged(getGameTurn());
-								endTurnTimerReset();
-							}
-
-							// Activate every AI, then deactivate as if turn finished.
-							/*int aiShuffle[MAX_PLAYERS]; int iI; int iLoopPlayer;
-							shuffleArray(aiShuffle, MAX_PLAYERS, getJonRand());
-							for (iI = 0; iI < MAX_PLAYERS; iI++)
-							{
-								iLoopPlayer = aiShuffle[iI];
-								CvPlayer& player = GET_PLAYER((PlayerTypes)iLoopPlayer);
-								if (player.isAlive() && !player.isHuman())
-								{
-									// Minimal setTurnActive(true)
-									DLLUI->PublishEndTurnDirty();
-									CUSTOMLOG("PublishEndTurnDirty");
-									DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, player.GetID());
-									CUSTOMLOG("PublishPlayerTurnStatus START");
-
-									CvAssert(player.hasProcessedAutoMoves());
-									CvAssert(!player.HasActiveDiplomacyRequests());
-									CvAssert(!kPlayer.hasBusyUnitOrCity());
-
-									// Minimal setTurnActive(false)
-									DLLUI->PublishEndTurnDirty();
-									CUSTOMLOG("PublishEndTurnDirty");
-									DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, player.GetID());
-									CUSTOMLOG("PublishPlayerTurnStatus TURN_END");
-
-									//player.setTurnActive(true);
-									//player.setTurnActive(false);
-								}
-							}*/
-
-							// Probably resets HasSentTurnComplete() for everyone(?) or the other publish?
-							gDLL->PublishNewGameTurn(getGameTurn());
-
-
-							// Pretend all AI civ's were processed.
-							gDLL->SendAICivsProcessed();
-
-							// Activate human players with simultaneous turns now, after war-phase.
-							for (int iI = 0; iI < MAX_PLAYERS; iI++)
-							{
-								CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
-								if (!player.isTurnActive() && player.isHuman() && player.isAlive())
-								{
-									// Only send event for local-player (once)
-									if (getActivePlayer() == player.GetID()) {
-										resetTurnTimer(true);
-										CUSTOMLOG("World turn started: Enabling Input, non-war-phase! :)");
-										GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
-									}
-									player.setTurnActive(true); // Try with doTurn=false?
-
-									//if (GC.getGame().getActivePlayer() == player.GetID())
-									//	gDLL->sendPlayerInitialAIProcessed();
-
-									// TODO: Won't let me unready!!! ???
-									//if (player.isLocalPlayer() && gDLL->sendTurnUnready())
-									if (gDLL->sendTurnUnready())
-										CUSTOMLOG("Managed to send unready for turn!");
-								}
-							}
-							CUSTOMLOG("Active turns: %i", getNumGameTurnActive());
+						// incrementGameTurn() -> setGameTurn()
+						{
+							//GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
+							//GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
+							m_sentAutoMoves = false;
+							gDLL->GameplayTurnChanged(getGameTurn());
+							endTurnTimerReset();
 						}
 
-						// Toggle after a turn/phase has ended.
-						m_bWarPhase = !m_bWarPhase;
+						gDLL->PublishNewGameTurn(getGameTurn());
+
+					//***
+					//*** Game flow simulation
+					//***
+						// Pretend all AI civ's just finished processing.
+						gDLL->SendAICivsProcessed();
+
+						// Activate human players with simultaneous turns now, after war-phase.
+						for (int iI = 0; iI < MAX_PLAYERS; iI++)
+						{
+							CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
+							if (!player.isTurnActive() && player.isHuman() && player.isAlive())
+							{
+								// Only send event for local-player (once)
+								if (getActivePlayer() == player.GetID()) {
+									resetTurnTimer(true);
+									CUSTOMLOG("World turn started: Enabling Input, non-war-phase! :)");
+									GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
+								}
+								player.setTurnActive(true, false); // Set, but don't 'do' anything.
+								player.DoUnitReset(); // Recent units for all players at start instead of end (heal & restore move)
+							}
+						}
+						CUSTOMLOG("Active turns: %i", getNumGameTurnActive());
 					}
+					// Toggle after a turn/phase has ended.
+					m_bWarPhase = !m_bWarPhase;
 				}
 #endif
 			}
