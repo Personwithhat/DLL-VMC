@@ -1677,14 +1677,14 @@ void CvTeam::DoMakePeace(TeamTypes eTeam, bool bBumpUnits, bool bSuppressNotific
 				for (int iMinorCivLoop = MAX_MAJOR_CIVS; iMinorCivLoop < MAX_CIV_PLAYERS; iMinorCivLoop++)
 				{
 					// Get minor Civ's ally
-					CvPlayer& minorCiv = GET_PLAYER((PlayerTypes)iI);
+					CvPlayer& minorCiv = GET_PLAYER((PlayerTypes)iMinorCivLoop);
 					PlayerTypes alliedPlayer = minorCiv.GetMinorCivAI()->GetAlly();
 					TeamTypes alliedTeam = GET_PLAYER(alliedPlayer).getTeam();
 
 					// Check if we just peaced the minor's ally
 					if (minorCiv.isAlive() && alliedTeam == eTeamWeMadePeaceWith)
 					{
-						GET_TEAM(minorCiv.getTeam()).DoMakePeace((PlayerTypes)iI, bPacifier, GetID(), /*bBumpUnits*/ true, /*bSuppressNotification*/ true);
+						GET_TEAM(minorCiv.getTeam()).DoMakePeace((PlayerTypes)iMinorCivLoop, bPacifier, GetID(), /*bBumpUnits*/ true, /*bSuppressNotification*/ true);
 					}
 				}
 				// PERSONAL TODO: Send notifications (if needed) that these civs all made peace......
