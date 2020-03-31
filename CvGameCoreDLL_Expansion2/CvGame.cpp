@@ -1595,6 +1595,9 @@ void CvGame::CheckPlayerTurnDeactivate()
 						GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 					}
 					player.setTurnActive(true);
+#ifdef  MOD_WAR_PHASE
+					break; // Only activate first player initially, after AI all done.
+#endif //  MOD_WAR_PHASE
 				}
 			}
 		}
@@ -1631,7 +1634,10 @@ void CvGame::CheckPlayerTurnDeactivate()
 						// In that case, the local human is (should be) the player we just deactivated the turn for
 						// and the AI players will be activated all at once in CvGame::doTurn, once we have received
 						// all the moves from the other human players
+#ifndef MOD_WAR_PHASE
+						// Normally don't hand of to next player.
 						if(!kPlayer.isSimultaneousTurns())
+#endif
 						{
 							if((isPbem() || isHotSeat()) && kPlayer.isHuman() && countHumanPlayersAlive() > 1)
 							{
@@ -1669,7 +1675,11 @@ void CvGame::CheckPlayerTurnDeactivate()
 										for(int iJ = (kPlayer.GetID() + 1); iJ < MAX_PLAYERS; iJ++)
 										{
 											CvPlayer& kNextPlayer = GET_PLAYER((PlayerTypes)iJ);
-											if(kNextPlayer.isAlive() && !kNextPlayer.isSimultaneousTurns())
+											if(kNextPlayer.isAlive() 
+#ifndef MOD_WAR_PHASE
+												&& !kNextPlayer.isSimultaneousTurns()
+#endif
+											)
 											{//the player is alive and also running sequential turns.  they're up!
 												if(isPbem() && kNextPlayer.isHuman())
 												{
@@ -3519,7 +3529,7 @@ void CvGame::doControl(ControlTypes eControl)
 			kActivePlayer.GetPlayerAchievements().EndTurn();
 #endif
 			gDLL->sendTurnComplete(); // TURNS: Looks like this is where you send 'Turn Complete'!
-			CUSTOMLOG("TURNS: Sent turn-complete 3");
+			CUSTOMLOG("TURNS: Sent turn-complete 3"); // TODO: But not if timer times out! Different process there........sigh.
 #if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
 #endif
