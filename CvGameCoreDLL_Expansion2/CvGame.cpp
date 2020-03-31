@@ -1489,6 +1489,9 @@ void CvGame::update()
 				gDLL->AutoSave(true);
 			}
 
+			// TODO: This is where it actually decides to go onto the next turn?
+			// Hmm, maybe I should put a small delay on this (1 second or so) to avoid race-conditions?
+			// Either way this part can be fudged to not iterate unless war-phase is done! :)
 			// If there are no active players, move on to the AI
 			if(getNumGameTurnActive() == 0)
 			{
@@ -1500,6 +1503,7 @@ void CvGame::update()
 			{
 				updateScore();
 
+				// TODO: Commenting this out, maybe will block AI from declaring war!?
 				updateWar();
 
 				updateMoves();
@@ -2054,6 +2058,7 @@ void CvGame::updateTestEndTurn()
 						activePlayer.GetPlayerAchievements().EndTurn();
 #endif
 						gDLL->sendTurnComplete();
+						CUSTOMLOG("TURNS: Sent turn-complete 1");
 #if !defined(NO_ACHIEVEMENTS)
 						CvAchievementUnlocker::EndTurn();
 #endif
@@ -2140,6 +2145,7 @@ void CvGame::updateTestEndTurn()
 									activePlayer.GetPlayerAchievements().EndTurn();
 #endif
 									gDLL->sendTurnComplete();
+									CUSTOMLOG("TURNS: Sent turn-complete 2");
 #if !defined(NO_ACHIEVEMENTS)
 									CvAchievementUnlocker::EndTurn();
 #endif
@@ -3512,7 +3518,8 @@ void CvGame::doControl(ControlTypes eControl)
 #if !defined(NO_ACHIEVEMENTS)
 			kActivePlayer.GetPlayerAchievements().EndTurn();
 #endif
-			gDLL->sendTurnComplete();
+			gDLL->sendTurnComplete(); // TURNS: Looks like this is where you send 'Turn Complete'!
+			CUSTOMLOG("TURNS: Sent turn-complete 3");
 #if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
 #endif
@@ -3530,6 +3537,7 @@ void CvGame::doControl(ControlTypes eControl)
 			kActivePlayer.GetPlayerAchievements().EndTurn();
 #endif
 			gDLL->sendTurnComplete();
+			CUSTOMLOG("TURNS: Sent turn-complete 4");
 #if !defined(NO_ACHIEVEMENTS)
 			CvAchievementUnlocker::EndTurn();
 #endif
@@ -7642,6 +7650,9 @@ void CvGame::doTurn()
 	// If player unit cycling has been canceled for this turn, set it back to normal for the next
 	GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
 
+	// TURN-NOTE: Apparently this doesn't do much? Game mechanics working as per usual.
+	// No need to override anything here. Has to run (at least once?) though otherwise getLandmass() returns nullptr somewhat-early-on-ish when exploring.
+	// Skipping it when in debug mode (the access violation) eventually works lol......dunno.
 	gDLL->DoTurn();
 
 	CvBarbarians::BeginTurn();
@@ -8324,9 +8335,6 @@ void CvGame::updateMoves()
 		}
 	}
 
-
-	int currentTurn = getGameTurn();
-	bool activatePlayers = playersToProcess.empty() && m_lastTurnAICivsProcessed != currentTurn;
 	// If no AI with an active turn, check humans.
 	if(playersToProcess.empty())
 	{
@@ -8342,6 +8350,7 @@ void CvGame::updateMoves()
 				kActivePlayer.GetPlayerAchievements().EndTurn();
 #endif
 				gDLL->sendTurnComplete();
+				CUSTOMLOG("TURNS: Sent turn-complete 5");
 #if !defined(NO_ACHIEVEMENTS)
 				CvAchievementUnlocker::EndTurn();
 #endif

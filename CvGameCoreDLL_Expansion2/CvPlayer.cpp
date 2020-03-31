@@ -4601,7 +4601,7 @@ ArtStyleTypes CvPlayer::getArtStyleType() const
 //	---------------------------------------------------------------------------
 void CvPlayer::doTurn()
 {
-	// CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription())
+	CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription());
 	// Time building of these maps
 	AI_PERF_FORMAT("AI-perf.csv", ("CvPlayer::doTurn(), Turn %d, %s", GC.getGame().getGameTurn(), getCivilizationShortDescription()));
 
@@ -4850,6 +4850,7 @@ void CvPlayer::doTurnPostDiplomacy()
 	// Science
 	doResearch();
 
+	// PERSONAL TODO: Maybe espionage should happen before research?
 	GetEspionage()->DoTurn();
 
 	// Faith
@@ -17811,6 +17812,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			setEndTurn(false);
 
+			// TODO: Citadel/mountain/etc. damage apparently calculated here?
 			DoUnitAttrition();
 
 			if(kGame.getActivePlayer() == m_eID)
@@ -17839,6 +17841,10 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			kGame.changeNumGameTurnActive(1, infoStream.str());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
+
+			// Don't see this as 'false' anywhere in code, might be triggered from DLL.
+			if(!bDoTurn)
+				CUSTOMLOG("Do Turn is false!! Check it out.");
 
 			if(bDoTurn)
 			{

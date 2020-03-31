@@ -322,6 +322,9 @@
 // Enables production to be stockpiled (v28)
 #define MOD_PROCESS_STOCKPILE                       gCustomMods.isPROCESS_STOCKPILE()
 
+// Enforces a separate sequential 'war-phase' for simultaneous mode.
+#define MOD_WAR_PHASE								true
+
 // Stops the AI from adding zero-value items (eg late game horses) into trade offers (v85)
 #define MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS            gCustomMods.isAI_NO_ZERO_VALUE_TRADE_ITEMS()
 
