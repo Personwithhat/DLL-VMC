@@ -4608,7 +4608,7 @@ ArtStyleTypes CvPlayer::getArtStyleType() const
 //	---------------------------------------------------------------------------
 void CvPlayer::doTurn()
 {
-	// CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription())
+	CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription());
 	// Time building of these maps
 	AI_PERF_FORMAT("AI-perf.csv", ("CvPlayer::doTurn(), Turn %d, %s", GC.getGame().getGameTurn(), getCivilizationShortDescription()));
 
@@ -4857,6 +4857,7 @@ void CvPlayer::doTurnPostDiplomacy()
 	// Science
 	doResearch();
 
+	// PERSONAL TODO: Maybe espionage should happen before research?
 	GetEspionage()->DoTurn();
 
 	// Faith
@@ -5039,6 +5040,17 @@ void CvPlayer::DoUnitReset()
 
 	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 	{
+#ifdef MOD_WAR_PHASE
+		// Refresh units that do belong to the phase we are in
+		// Other units should have moves wiped.
+		if (isHuman()) {
+			if (GC.getGame().isWarPhase() != pLoopUnit->getUnitInfo().IsWarPhaseOnly()) {
+				pLoopUnit->finishMoves();
+				continue;
+			}
+		}
+#endif // MOD_WAR_PHASE
+
 		// HEAL UNIT?
 		if(!pLoopUnit->isEmbarked())
 		{
@@ -5058,6 +5070,7 @@ void CvPlayer::DoUnitReset()
 			}
 		}
 
+		// PERSONAL TODO: Citadel damage calculated here .-.
 		int iCitadelDamage;
 		if(pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
 		{
@@ -17805,6 +17818,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 	{
 		m_bTurnActive = bNewValue;
 		DLLUI->PublishEndTurnDirty();
+		CUSTOMLOG("PublishEndTurnDirty");
 
 		CvGame& kGame = GC.getGame();
 
@@ -17817,8 +17831,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			CvAssertMsg(isAlive(), "isAlive is expected to be true");
 
 			setEndTurn(false);
-
-			DoUnitAttrition();
 
 			if(kGame.getActivePlayer() == m_eID)
 			{
@@ -17846,9 +17858,11 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			kGame.changeNumGameTurnActive(1, infoStream.str());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
+			CUSTOMLOG("PublishPlayerTurnStatus START");
 
 			if(bDoTurn)
 			{
+				DoUnitAttrition();
 				SetAllUnitsUnprocessed();
 
 				bool bCommonPathFinderMPCaching = GC.getPathFinder().SetMPCacheSafe(true);
@@ -17906,6 +17920,8 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 				doWarnings();
 			}
 
+			DoUnitReset();
+
 #if defined(MOD_AI_MP_DIPLOMACY)
 			if (MOD_AI_MP_DIPLOMACY && isHuman())
 			{
@@ -17918,6 +17934,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			{
 				GetUnitCycler().Rebuild();
 
+				// PERSONAL TODO: Should jump to first unit with available movement?
+				// If none, then jump to nearest city? or do nothing? .-.
+				// Right now jumps ot selected unit even if it can't do anything.
 				if(DLLUI->GetLengthSelectionList() == 0)
 				{
 					DLLUI->setCycleSelectionCounter(1);
@@ -17927,10 +17946,12 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 				// slewis - added this so the tutorial knows when a turn begins
 				DLLUI->PublishActivePlayerTurnStart();
+				CUSTOMLOG("PublishActivePlayerTurnStart");
 			}
 			else if(isHuman() && kGame.isGameMultiPlayer())
 			{
 				DLLUI->PublishRemotePlayerTurnStart();
+				CUSTOMLOG("PublishRemotePlayerTurnStart");
 			}
 		}
 
@@ -17948,8 +17969,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			CvAssertFmt(GetEndTurnBlockingType() == NO_ENDTURN_BLOCKING_TYPE, "Expecting the end-turn blocking to be NO_ENDTURN_BLOCKING_TYPE, got %d", GetEndTurnBlockingType());
 			SetEndTurnBlocking(NO_ENDTURN_BLOCKING_TYPE, -1);	// Make sure this is clear so the UI doesn't block when it is not our turn.
-
-			DoUnitReset();
 
 			if(!isHuman())
 			{
@@ -17969,12 +17988,14 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			if(GetID() == kGame.getActivePlayer())
 			{
 				DLLUI->PublishActivePlayerTurnEnd();
+				CUSTOMLOG("PublishActivePlayerTurnEnd");
 			}
 
 			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && gDLL->HasReceivedTurnAllComplete(GetID())) || kGame.getAIAutoPlay())
 				kGame.changeNumGameTurnActive(-1, std::string("setTurnActive() for player ") + getName());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, GetID());
+			CUSTOMLOG("PublishPlayerTurnStatus TURN_END");
 		}
 	}
 	else
@@ -28067,6 +28088,7 @@ bool CancelActivePlayerEndTurn()
 		if (gDLL->sendTurnUnready())	// This will see if we can actually do the unready, sometimes you can't in MP games.
 		{
 			kActivePlayer.setEndTurn(false);
+			CUSTOMLOG("Canceled PlayerEndTurn and sent unready!");
 			return true;
 		}
 		return false;

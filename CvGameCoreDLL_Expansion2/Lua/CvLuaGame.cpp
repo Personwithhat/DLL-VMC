@@ -443,6 +443,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	Method(isWarPhase);
 	Method(GameDoneLoading);
 #endif
 }
@@ -3370,6 +3371,12 @@ int CvLuaGame::lGameDoneLoading(lua_State* L)
 	// Basically, hangs since gDLL->SendAICivsProcessed(); was not sent.
 	// Can't send it any earlier than here, will just do nothing!!
 	GC.getGame().SetLastTurnAICivsProcessed();
+	return 1;
+}
+
+int CvLuaGame::lisWarPhase(lua_State* L)
+{
+	lua_pushboolean(L, GC.getGame().isWarPhase());
 	return 1;
 }
 

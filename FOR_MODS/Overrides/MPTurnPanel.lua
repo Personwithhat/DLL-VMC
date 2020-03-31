@@ -358,7 +358,11 @@ function OnActivePlayerTurnStart()
 	
 	-- Play "It's Your Turn" Sound in multiplayer games.
 	if(PreGame.IsMultiplayerGame()) then
-		Events.AudioPlay2DSound("AS2D_EVENT_ACTIVE_PLAYER_TURN_START");
+		if(Game.isWarPhase()) then
+			Events.AudioPlay2DSound("AS2D_EVENT_WAR_PHASE");
+		else
+			Events.AudioPlay2DSound("AS2D_EVENT_ACTIVE_PLAYER_TURN_START");
+		end
 	end
 end
 Events.ActivePlayerTurnStart.Add( OnActivePlayerTurnStart );

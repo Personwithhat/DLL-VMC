@@ -95,6 +95,7 @@ protected:
 #if defined(MOD_API_LUA_EXTENSIONS)
 	LUAAPIEXTN(GetDateString, char*, iTurn);
 	LUAAPIEXTN(GameDoneLoading, void); // Only way for DLL to know that game is done loading, afaik.
+	LUAAPIEXTN(isWarPhase, bool);
 #endif
 
 	static int lGetElapsedGameTurns(lua_State* L);

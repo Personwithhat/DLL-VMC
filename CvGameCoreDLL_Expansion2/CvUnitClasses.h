@@ -124,6 +124,9 @@ public:
 	bool IsRivalTerritory() const;
 	bool IsMilitarySupport() const;
 	bool IsMilitaryProduction() const;
+#ifdef MOD_WAR_PHASE
+	bool IsWarPhaseOnly() const;
+#endif
 	bool IsPillage() const;
 	bool IsFound() const;
 	bool IsFoundAbroad() const;
