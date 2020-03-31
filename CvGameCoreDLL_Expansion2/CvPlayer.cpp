@@ -17799,6 +17799,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 	{
 		m_bTurnActive = bNewValue;
 		DLLUI->PublishEndTurnDirty();
+		CUSTOMLOG("PublishEndTurnDirty");
 
 		CvGame& kGame = GC.getGame();
 
@@ -17841,6 +17842,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			kGame.changeNumGameTurnActive(1, infoStream.str());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
+			CUSTOMLOG("PublishPlayerTurnStatus START");
 
 			// Don't see this as 'false' anywhere in code, might be triggered from DLL.
 			if(!bDoTurn)
@@ -17926,10 +17928,12 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 				// slewis - added this so the tutorial knows when a turn begins
 				DLLUI->PublishActivePlayerTurnStart();
+				CUSTOMLOG("PublishActivePlayerTurnStart");
 			}
 			else if(isHuman() && kGame.isGameMultiPlayer())
 			{
 				DLLUI->PublishRemotePlayerTurnStart();
+				CUSTOMLOG("PublishRemotePlayerTurnStart");
 			}
 		}
 
@@ -17968,12 +17972,14 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			if(GetID() == kGame.getActivePlayer())
 			{
 				DLLUI->PublishActivePlayerTurnEnd();
+				CUSTOMLOG("PublishActivePlayerTurnEnd");
 			}
 
 			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && gDLL->HasReceivedTurnAllComplete(GetID())) || kGame.getAIAutoPlay())
 				kGame.changeNumGameTurnActive(-1, std::string("setTurnActive() for player ") + getName());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, GetID());
+			CUSTOMLOG("PublishPlayerTurnStatus TURN_END");
 		}
 	}
 	else
@@ -28061,6 +28067,7 @@ bool CancelActivePlayerEndTurn()
 		if (gDLL->sendTurnUnready())	// This will see if we can actually do the unready, sometimes you can't in MP games.
 		{
 			kActivePlayer.setEndTurn(false);
+			CUSTOMLOG("Canceled PlayerEndTurn and sent unready!");
 			return true;
 		}
 		return false;

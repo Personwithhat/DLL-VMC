@@ -986,6 +986,9 @@ void CvGame::uninit()
 
 	m_bForceEndingTurn = false;
 
+	// TODO: Don't think this should be saved.
+	m_bWarPhase = true;
+
 	m_lastTurnAICivsProcessed = -1;
 	m_iEndTurnMessagesSent = 0;
 	m_iElapsedGameTurns = 0;
@@ -1495,8 +1498,115 @@ void CvGame::update()
 			// If there are no active players, move on to the AI
 			if(getNumGameTurnActive() == 0)
 			{
-				if(gDLL->CanAdvanceTurn())
+#ifndef MOD_WAR_PHASE
+				if (gDLL->CanAdvanceTurn())
 					doTurn();
+#else
+				if (gDLL->CanAdvanceTurn()) {
+					CUSTOMLOG("========= Can advance turn =========");
+
+					// TEMP-HACK?
+					if (getGameTurn() == 0)
+						doTurn();
+					else {
+						if (!m_bWarPhase)
+							doTurn();
+						else {
+							// TODO: Which one of these should run/not-run?
+							// Obfuscated DLL stuff.
+							gDLL->DoTurn();
+
+							// If player unit cycling has been canceled for this turn, set it back to normal for the next
+							GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
+							GC.GetEngineUserInterface()->doTurn();
+							GC.GetEngineUserInterface()->setCanEndTurn(false);
+							GC.GetEngineUserInterface()->setHasMovedUnit(false);
+
+							// incrementGameTurn() -> setGameTurn()
+							{
+								std::string turnMessage = std::string("Game Turn ") + FSerialization::toString(getGameTurn()) + std::string(" - war_phase \n");
+								gDLL->netMessageDebugLog(turnMessage);
+
+								//CvPreGame::setGameTurn(iNewValue);
+								CvAssert(getGameTurn() >= 0);
+
+								//setScoreDirty(true);
+
+								GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
+								//GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
+								m_sentAutoMoves = false;
+								gDLL->GameplayTurnChanged(getGameTurn());
+								endTurnTimerReset();
+							}
+
+							// Activate every AI, then deactivate as if turn finished.
+							/*int aiShuffle[MAX_PLAYERS]; int iI; int iLoopPlayer;
+							shuffleArray(aiShuffle, MAX_PLAYERS, getJonRand());
+							for (iI = 0; iI < MAX_PLAYERS; iI++)
+							{
+								iLoopPlayer = aiShuffle[iI];
+								CvPlayer& player = GET_PLAYER((PlayerTypes)iLoopPlayer);
+								if (player.isAlive() && !player.isHuman())
+								{
+									// Minimal setTurnActive(true)
+									DLLUI->PublishEndTurnDirty();
+									CUSTOMLOG("PublishEndTurnDirty");
+									DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, player.GetID());
+									CUSTOMLOG("PublishPlayerTurnStatus START");
+
+									CvAssert(player.hasProcessedAutoMoves());
+									CvAssert(!player.HasActiveDiplomacyRequests());
+									CvAssert(!kPlayer.hasBusyUnitOrCity());
+
+									// Minimal setTurnActive(false)
+									DLLUI->PublishEndTurnDirty();
+									CUSTOMLOG("PublishEndTurnDirty");
+									DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, player.GetID());
+									CUSTOMLOG("PublishPlayerTurnStatus TURN_END");
+
+									//player.setTurnActive(true);
+									//player.setTurnActive(false);
+								}
+							}*/
+
+							// Probably resets HasSentTurnComplete() for everyone(?) or the other publish?
+							gDLL->PublishNewGameTurn(getGameTurn());
+
+
+							// Pretend all AI civ's were processed.
+							gDLL->SendAICivsProcessed();
+
+							// Activate human players with simultaneous turns now, after war-phase.
+							for (int iI = 0; iI < MAX_PLAYERS; iI++)
+							{
+								CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
+								if (!player.isTurnActive() && player.isHuman() && player.isAlive())
+								{
+									// Only send event for local-player (once)
+									if (getActivePlayer() == player.GetID()) {
+										resetTurnTimer(true);
+										CUSTOMLOG("World turn started: Enabling Input, non-war-phase! :)");
+										GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
+									}
+									player.setTurnActive(true); // Try with doTurn=false?
+
+									//if (GC.getGame().getActivePlayer() == player.GetID())
+									//	gDLL->sendPlayerInitialAIProcessed();
+
+									// TODO: Won't let me unready!!! ???
+									//if (player.isLocalPlayer() && gDLL->sendTurnUnready())
+									if (gDLL->sendTurnUnready())
+										CUSTOMLOG("Managed to send unready for turn!");
+								}
+							}
+							CUSTOMLOG("Active turns: %i", getNumGameTurnActive());
+						}
+
+						// Toggle after a turn/phase has ended.
+						m_bWarPhase = !m_bWarPhase;
+					}
+				}
+#endif
 			}
 
 			if(!isPaused())	// Check for paused again, the doTurn call might have called something that paused the game and we don't want an update to sneak through
@@ -1637,6 +1747,8 @@ void CvGame::CheckPlayerTurnDeactivate()
 #ifndef MOD_WAR_PHASE
 						// Normally don't hand of to next player.
 						if(!kPlayer.isSimultaneousTurns())
+#else
+						if (kPlayer.isHuman() || !kPlayer.isSimultaneousTurns())
 #endif
 						{
 							if((isPbem() || isHotSeat()) && kPlayer.isHuman() && countHumanPlayersAlive() > 1)
@@ -1675,11 +1787,11 @@ void CvGame::CheckPlayerTurnDeactivate()
 										for(int iJ = (kPlayer.GetID() + 1); iJ < MAX_PLAYERS; iJ++)
 										{
 											CvPlayer& kNextPlayer = GET_PLAYER((PlayerTypes)iJ);
-											if(kNextPlayer.isAlive() 
 #ifndef MOD_WAR_PHASE
-												&& !kNextPlayer.isSimultaneousTurns()
+											if(kNextPlayer.isAlive() && !kNextPlayer.isSimultaneousTurns())
+#else
+											if (kNextPlayer.isAlive() && (!kNextPlayer.isSimultaneousTurns() || kNextPlayer.isHuman()))
 #endif
-											)
 											{//the player is alive and also running sequential turns.  they're up!
 												if(isPbem() && kNextPlayer.isHuman())
 												{
@@ -2164,6 +2276,7 @@ void CvGame::updateTestEndTurn()
 								GC.GetEngineUserInterface()->setEndTurnCounter(3); // XXX
 								if(isGameMultiPlayer())
 								{
+									CUSTOMLOG("Turns: Can end-turn now.");
 									GC.GetEngineUserInterface()->setCanEndTurn(true);
 									m_endTurnTimer.Start();
 								}
@@ -5759,6 +5872,7 @@ void CvGame::setActivePlayer(PlayerTypes eNewValue, bool bForceHotSeat, bool bAu
 			// Messages will be sent out by the updating of the fog and they do not indicate
 			// the player the update is for, so listeners will want to get the player change message first
 			gDLL->PublishActivePlayer(eNewValue, eOldActivePlayer);
+			CUSTOMLOG("New active player!!!");
 
 			CvMap& theMap = GC.getMap();
 			theMap.updateFog();
@@ -7655,7 +7769,7 @@ void CvGame::doTurn()
 	//We reset the turn timer now so that we know that the turn timer has been reset at least once for
 	//this turn.  CvGameController::Update() will continue to reset the timer if there is prolonged ai processing.
 	if (!isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
-		resetTurnTimer(true);;
+		resetTurnTimer(true);
 
 	// If player unit cycling has been canceled for this turn, set it back to normal for the next
 	GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
@@ -8348,6 +8462,10 @@ void CvGame::updateMoves()
 	// If no AI with an active turn, check humans.
 	if(playersToProcess.empty())
 	{
+		//CUSTOMLOG("No AI left to process");
+		//if(!gDLL->allAICivsProcessedThisTurn())
+		//	CUSTOMLOG("But it still thinks we're processing!!")
+
 		if(gDLL->allAICivsProcessedThisTurn())
 		{//everyone is finished processing the AI civs.
 			PlayerTypes eActivePlayer = getActivePlayer();
@@ -8388,6 +8506,7 @@ void CvGame::updateMoves()
 			{
 				CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
 
+				// PERSONAL TODO: Or maybe it's this? MOre'n'likely something with AI civs or something......
 				player.checkInitialTurnAIProcessed();
 				if(player.isTurnActive() && player.isHuman())
 				{
@@ -8464,8 +8583,6 @@ void CvGame::updateMoves()
 					}
 				}
 
-
-
 				if(player.isAutoMoves() && (!player.isHuman() || processPlayerAutoMoves))
 				{
 					bool bRepeatAutomoves = false;
@@ -8492,8 +8609,10 @@ void CvGame::updateMoves()
 																									<< " AutoMission did not use up all movement points for " 
 																									<< pLoopUnit->getName() << " id=" << pLoopUnit->GetID());
 
-									if(player.isLocalPlayer() && gDLL->sendTurnUnready())
+									if (player.isLocalPlayer() && gDLL->sendTurnUnready()) {
 										player.setEndTurn(false);
+										CUSTOMLOG("Canceled PlayerEndTurn and sent unready!");
+									}
 								}
 							}
 
@@ -8523,8 +8642,10 @@ void CvGame::updateMoves()
 									else
 									{
 										CvAssertMsg(GC.getGame().getActivePlayer() == player.GetID(), "slewis - We should not need to resolve ambiguous end turns for the AI or remotely.");
-										if(player.isLocalPlayer() && gDLL->sendTurnUnready())
+										if (player.isLocalPlayer() && gDLL->sendTurnUnready()) {
 											player.setEndTurn(false);
+											CUSTOMLOG("Canceled PlayerEndTurn and sent unready!");
+										}
 									}
 								}
 							}
@@ -8582,11 +8703,15 @@ void CvGame::updateMoves()
 					}
 				}
 
+				if(!gDLL->HasReceivedTurnComplete(player.GetID()))
+					CUSTOMLOG("Ain't received turn complete for this player")
+
 				// KWG: This code should go into CheckPlayerTurnDeactivate
 				if(!player.isEndTurn() && gDLL->HasReceivedTurnComplete(player.GetID()) && player.isHuman() /* && (isNetworkMultiPlayer() || (!isNetworkMultiPlayer() && player.GetID() != getActivePlayer())) */)
 				{
 					if(!player.hasBusyUnitOrCity())
 					{
+						CUSTOMLOG("Setting EndTurn to true, since received turn complete + no busy units/etc.")
 						player.setEndTurn(true);
 						if(player.isEndTurn())
 						{//If the player's turn ended, indicate it in the log.  We only do so when the end turn state has changed to prevent useless log spamming in multiplayer. 

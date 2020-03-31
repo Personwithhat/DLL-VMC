@@ -627,6 +627,7 @@ private:
 	const static unsigned int ms_aiSizes[10];
 
 protected:
+	bool m_bWarPhase;
 
 	int m_iEndTurnMessagesSent;
 	int m_iElapsedGameTurns;
