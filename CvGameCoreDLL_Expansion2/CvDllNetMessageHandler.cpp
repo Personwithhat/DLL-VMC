@@ -127,10 +127,24 @@ void CvDllNetMessageHandler::ResponseIgnoreWarning(PlayerTypes ePlayer, TeamType
 	kTeam.PushIgnoreWarning(eRivalTeam);
 }
 //------------------------------------------------------------------------------
+
+#ifdef MOD_WAR_PHASE
+#define WARP_PHASE_CHECK \
+	if (GC.getGame().isWarPhase()) {\
+		CUSTOMLOG("ERROR: tweaking city during war! Nope :)");\
+		return;\
+	}
+#else
+#define WARP_PHASE_CHECK
+#endif
+
 void CvDllNetMessageHandler::ResponseCityBuyPlot(PlayerTypes ePlayer, int iCityID, int iX, int iY)
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+
+	WARP_PHASE_CHECK
+
 	if(pkCity != NULL)
 	{
 		CvPlot* pkPlot = NULL;
@@ -164,6 +178,16 @@ void CvDllNetMessageHandler::ResponseCityDoTask(PlayerTypes ePlayer, int iCityID
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
 
+#ifdef MOD_WAR_PHASE
+	if (GC.getGame().isWarPhase()) {
+		// TODO: Confirm the necessity of this exception.
+		if (eTask != TASK_CREATE_PUPPET && eTask != TASK_RAZE && eTask != TASK_ANNEX_PUPPET) {
+			CUSTOMLOG("ERROR: Stahp touching your city! during war! Nope :)");
+			return;
+		}
+	}
+#endif // 
+
 	if(pkCity != NULL)
 	{
 		pkCity->doTask(eTask, iData1, iData2, bOption, bAlt, bShift, bCtrl);
@@ -174,6 +198,9 @@ void CvDllNetMessageHandler::ResponseCityPopOrder(PlayerTypes ePlayer, int iCity
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+
+	WARP_PHASE_CHECK
+
 	if(pkCity != NULL)
 	{
 		pkCity->popOrder(iNum);
@@ -189,6 +216,9 @@ void CvDllNetMessageHandler::ResponseCityPurchase(PlayerTypes ePlayer, int iCity
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+
+	WARP_PHASE_CHECK
+
 	if(pkCity && ePurchaseYield >= -1 && ePurchaseYield < NUM_YIELD_TYPES)
 	{
 		pkCity->Purchase(eUnitType, eBuildingType, eProjectType, static_cast<YieldTypes>(ePurchaseYield));
@@ -199,6 +229,9 @@ void CvDllNetMessageHandler::ResponseCityPushOrder(PlayerTypes ePlayer, int iCit
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+
+	WARP_PHASE_CHECK
+
 	if(pkCity != NULL)
 	{
 		pkCity->pushOrder(eOrder, iData, -1, bAlt, bShift, bCtrl);
@@ -209,6 +242,9 @@ void CvDllNetMessageHandler::ResponseCitySwapOrder(PlayerTypes ePlayer, int iCit
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 	CvCity* pkCity = kPlayer.getCity(iCityID);
+
+	WARP_PHASE_CHECK
+
 	if(pkCity != NULL)
 	{
 		pkCity->swapOrder(iNum);
@@ -909,6 +945,7 @@ void CvDllNetMessageHandler::ResponseReturnCivilian(PlayerTypes ePlayer, PlayerT
 void CvDllNetMessageHandler::ResponseSellBuilding(PlayerTypes ePlayer, int iCityID, BuildingTypes eBuilding)
 {
 	CvCity* pCity = GET_PLAYER(ePlayer).getCity(iCityID);
+	WARP_PHASE_CHECK
 	if(pCity)
 	{
 		pCity->GetCityBuildings()->DoSellBuilding(eBuilding);
@@ -938,6 +975,7 @@ void CvDllNetMessageHandler::ResponseSellBuilding(PlayerTypes ePlayer, int iCity
 void CvDllNetMessageHandler::ResponseSetCityAIFocus(PlayerTypes ePlayer, int iCityID, CityAIFocusTypes eFocus)
 {
 	CvCity* pCity = GET_PLAYER(ePlayer).getCity(iCityID);
+	WARP_PHASE_CHECK
 	if(pCity != NULL)
 	{
 		CvCityCitizens* pkCitizens = pCity->GetCityCitizens();
@@ -951,6 +989,7 @@ void CvDllNetMessageHandler::ResponseSetCityAIFocus(PlayerTypes ePlayer, int iCi
 void CvDllNetMessageHandler::ResponseSetCityAvoidGrowth(PlayerTypes ePlayer, int iCityID, bool bAvoidGrowth)
 {
 	CvCity* pCity = GET_PLAYER(ePlayer).getCity(iCityID);
+	WARP_PHASE_CHECK
 	if(pCity != NULL)
 	{
 		CvCityCitizens* pkCitizens = pCity->GetCityCitizens();

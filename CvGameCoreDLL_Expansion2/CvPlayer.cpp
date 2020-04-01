@@ -5033,6 +5033,17 @@ void CvPlayer::DoUnitReset()
 
 	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 	{
+#ifdef MOD_WAR_PHASE
+		// Refresh units that do NOT belong to the phase we are in (we are leaving it, end-turn)
+		// Other units should have moves wiped.
+		if (isHuman()) {
+			if (GC.getGame().isWarPhase() == pLoopUnit->getUnitInfo().IsWarPhaseOnly()) {
+				pLoopUnit->finishMoves();
+				continue;
+			}
+		}
+#endif // MOD_WAR_PHASE
+
 		// HEAL UNIT?
 		if(!pLoopUnit->isEmbarked())
 		{
@@ -17952,13 +17963,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			CvAssertFmt(GetEndTurnBlockingType() == NO_ENDTURN_BLOCKING_TYPE, "Expecting the end-turn blocking to be NO_ENDTURN_BLOCKING_TYPE, got %d", GetEndTurnBlockingType());
 			SetEndTurnBlocking(NO_ENDTURN_BLOCKING_TYPE, -1);	// Make sure this is clear so the UI doesn't block when it is not our turn.
 
-#ifdef MOD_WAR_PHASE
-			// Handled elsewhere for players.
-			if (!isHuman())
-				DoUnitReset();
-#else
 			DoUnitReset();
-#endif
 
 			if(!isHuman())
 			{

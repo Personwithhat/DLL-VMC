@@ -1504,7 +1504,10 @@ void CvGame::update()
 #else
 				if (gDLL->CanAdvanceTurn()) {
 					CUSTOMLOG("========= Can advance turn =========");
-					if (!m_bWarPhase)
+					// Switch which state we are entering. If war -> non-war, if non-war -> war.
+					m_bWarPhase = !m_bWarPhase;
+
+					if (m_bWarPhase)
 						doTurn();
 					else {
 					//***
@@ -1547,13 +1550,10 @@ void CvGame::update()
 									GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 								}
 								player.setTurnActive(true, false); // Set, but don't 'do' anything.
-								player.DoUnitReset(); // Recent units for all players at start instead of end (heal & restore move)
 							}
 						}
 						CUSTOMLOG("Active turns: %i", getNumGameTurnActive());
 					}
-					// Toggle after a turn/phase has ended.
-					m_bWarPhase = !m_bWarPhase;
 				}
 #endif
 			}
@@ -2681,6 +2681,15 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 	{
 		if(pkSelectedUnit->getOwner() == getActivePlayer() && !pSelectedUnit->IsBusy())
 		{
+#ifdef MOD_WAR_PHASE
+			if (m_bWarPhase != pkSelectedUnit->getUnitInfo().IsWarPhaseOnly()) {
+				CUSTOMLOG("ERROR: Tried to move unit in wrong phase!");
+				// Hack to workaround, shouldn't need it. Plus it might cause desync's.
+				//pkSelectedUnit->finishMoves();
+				return;
+			}
+#endif
+
 			if(eMessage == GAMEMESSAGE_DO_COMMAND)
 			{
 				gDLL->sendDoCommand(pkSelectedUnit->GetID(), ((CommandTypes)iData2), iData3, iData4, bAlt);
@@ -2725,6 +2734,25 @@ void CvGame::selectedCitiesGameNetMessage(int eMessage, int iData2, int iData3, 
 	CvCity* pSelectedCity;
 
 	pSelectedCityNode = GC.GetEngineUserInterface()->headSelectedCitiesNode();
+
+	// PERSONAL TODO: Lua for CityView sometimes calls directly, e.g. Network.SendDoTask() or Network.SendUpdateCityCitizens()
+	// It bypasses C++ here (for no apparent reason??)
+	// Need to improve all this anyway. Should simply not show the UI buttons, instead of 'silently' blocking action.
+#ifdef MOD_WAR_PHASE
+	if (isWarPhase()) {
+		// TODO: Confirm the necessity of this exception.
+		if (eMessage == GAMEMESSAGE_DO_TASK) {
+			TaskTypes task = (TaskTypes)iData2;
+			if (task != TASK_CREATE_PUPPET && task != TASK_RAZE && task != TASK_ANNEX_PUPPET) {
+				CUSTOMLOG("ERROR: Stahp touching your city! during war! Nope :)");
+				return;
+			}
+		} else {
+			CUSTOMLOG("ERROR: Tried to do something with city during war. Nope :)");
+			return;
+		}
+	}
+#endif
 
 	while(pSelectedCityNode != NULL)
 	{
@@ -5170,6 +5198,12 @@ void CvGame::setScoreDirty(bool bNewValue)
 	m_bScoreDirty = bNewValue;
 }
 
+
+//	--------------------------------------------------------------------------------
+bool CvGame::isWarPhase() const
+{
+	return m_bWarPhase;
+}
 
 //	--------------------------------------------------------------------------------
 bool CvGame::isCircumnavigated() const
@@ -8652,8 +8686,8 @@ void CvGame::updateMoves()
 					}
 				}
 
-				if(!gDLL->HasReceivedTurnComplete(player.GetID()))
-					CUSTOMLOG("Ain't received turn complete for this player")
+				//if(!gDLL->HasReceivedTurnComplete(player.GetID()))
+				//	CUSTOMLOG("Ain't received turn complete for this player")
 
 				// KWG: This code should go into CheckPlayerTurnDeactivate
 				if(!player.isEndTurn() && gDLL->HasReceivedTurnComplete(player.GetID()) && player.isHuman() /* && (isNetworkMultiPlayer() || (!isNetworkMultiPlayer() && player.GetID() != getActivePlayer())) */)

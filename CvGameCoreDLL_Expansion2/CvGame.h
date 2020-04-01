@@ -235,6 +235,10 @@ public:
 	bool isScoreDirty() const;
 	void setScoreDirty(bool bNewValue);
 
+#ifdef MOD_WAR_PHASE
+	bool isWarPhase() const;
+#endif
+
 	bool isCircumnavigated() const;
 	void makeCircumnavigated();
 	bool circumnavigationAvailable() const;
