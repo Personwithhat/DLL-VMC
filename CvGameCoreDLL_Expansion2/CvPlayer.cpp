@@ -17855,11 +17855,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
 			CUSTOMLOG("PublishPlayerTurnStatus START");
 
-			// Don't see this as 'false' anywhere in code, might be triggered from DLL.
-			// Ignore my war-phase call though.
-			if(!bDoTurn && !(GC.getGame().isWarPhase()))
-				CUSTOMLOG("WARNING: Do Turn is false!! Check it out.");
-
 			if(bDoTurn)
 			{
 				SetAllUnitsUnprocessed();

@@ -1544,7 +1544,7 @@ void CvGame::update()
 								// Only send event for local-player (once)
 								if (getActivePlayer() == player.GetID()) {
 									resetTurnTimer(true);
-									CUSTOMLOG("World turn started: Enabling Input, non-war-phase! :)");
+									CUSTOMLOG("SIM-PHASE: Enabling Input");
 									GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 								}
 								player.setTurnActive(true, false); // Set, but don't 'do' anything.
@@ -1648,7 +1648,7 @@ void CvGame::CheckPlayerTurnDeactivate()
 					// Only send event for local-player (once)
 					if (getActivePlayer() == player.GetID()) {
 						resetTurnTimer(true);
-						CUSTOMLOG("World turn started: Enabling Input");
+						CUSTOMLOG("WAR-PHASE: Enabling Input");
 						GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 					}
 					player.setTurnActive(true);
