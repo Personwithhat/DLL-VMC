@@ -1394,7 +1394,6 @@ void CvUnitMission::StartMission(UnitHandle hUnit)
 
 	CvPlayerAI& kUnitOwner = GET_PLAYER(hUnit->getOwner());
 
-	// PERSONAL TODO: Maybe something similar to this can prevent unit movement?
 	if(!kUnitOwner.isSimultaneousTurns())
 	{
 		if(!kUnitOwner.isTurnActive())

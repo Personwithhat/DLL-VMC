@@ -5063,6 +5063,7 @@ void CvPlayer::DoUnitReset()
 			}
 		}
 
+		// PERSONAL TODO: Citadel damage calculated here .-.
 		int iCitadelDamage;
 		if(pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
 		{
@@ -17824,7 +17825,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			setEndTurn(false);
 
-			// TODO: Citadel/mountain/etc. damage apparently calculated here?
 			DoUnitAttrition();
 
 			if(kGame.getActivePlayer() == m_eID)
@@ -17856,8 +17856,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			CUSTOMLOG("PublishPlayerTurnStatus START");
 
 			// Don't see this as 'false' anywhere in code, might be triggered from DLL.
-			if(!bDoTurn)
-				CUSTOMLOG("Do Turn is false!! Check it out.");
+			// Ignore my war-phase call though.
+			if(!bDoTurn && !(GC.getGame().isWarPhase()))
+				CUSTOMLOG("WARNING: Do Turn is false!! Check it out.");
 
 			if(bDoTurn)
 			{
@@ -17930,6 +17931,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			{
 				GetUnitCycler().Rebuild();
 
+				// PERSONAL TODO: Should jump to first unit with available movement?
+				// If none, then jump to nearest city? or do nothing? .-.
+				// Right now jumps ot selected unit even if it can't do anything.
 				if(DLLUI->GetLengthSelectionList() == 0)
 				{
 					DLLUI->setCycleSelectionCounter(1);

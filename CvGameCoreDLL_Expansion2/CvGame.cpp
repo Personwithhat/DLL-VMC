@@ -1492,10 +1492,8 @@ void CvGame::update()
 				gDLL->AutoSave(true);
 			}
 
-			// TODO: This is where it actually decides to go onto the next turn?
-			// Hmm, maybe I should put a small delay on this (1 second or so) to avoid race-conditions?
-			// Either way this part can be fudged to not iterate unless war-phase is done! :)
-			// If there are no active players, move on to the AI
+			// TODO: This is where it actually decides to go onto the next turn.
+			// Hmm, maybe I should put a small delay on this (1 second or so) to avoid race-conditions and rollover desyncs?
 			if(getNumGameTurnActive() == 0)
 			{
 #ifndef MOD_WAR_PHASE
@@ -2225,7 +2223,7 @@ void CvGame::updateTestEndTurn()
 								GC.GetEngineUserInterface()->setEndTurnCounter(3); // XXX
 								if(isGameMultiPlayer())
 								{
-									CUSTOMLOG("Turns: Can end-turn now.");
+									//CUSTOMLOG("Turns: Can end-turn now.");
 									GC.GetEngineUserInterface()->setCanEndTurn(true);
 									m_endTurnTimer.Start();
 								}
@@ -7757,9 +7755,6 @@ void CvGame::doTurn()
 	// If player unit cycling has been canceled for this turn, set it back to normal for the next
 	GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
 
-	// TURN-NOTE: Apparently this doesn't do much? Game mechanics working as per usual.
-	// No need to override anything here. Has to run (at least once?) though otherwise getLandmass() returns nullptr somewhat-early-on-ish when exploring.
-	// Skipping it when in debug mode (the access violation) eventually works lol......dunno.
 	gDLL->DoTurn();
 
 	CvBarbarians::BeginTurn();
@@ -8694,7 +8689,7 @@ void CvGame::updateMoves()
 				{
 					if(!player.hasBusyUnitOrCity())
 					{
-						CUSTOMLOG("Setting EndTurn to true, since received turn complete + no busy units/etc.")
+						//CUSTOMLOG("Setting EndTurn to true, since received turn complete + no busy units/etc.")
 						player.setEndTurn(true);
 						if(player.isEndTurn())
 						{//If the player's turn ended, indicate it in the log.  We only do so when the end turn state has changed to prevent useless log spamming in multiplayer. 
