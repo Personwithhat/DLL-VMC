@@ -180,11 +180,13 @@ void CvDllNetMessageHandler::ResponseCityDoTask(PlayerTypes ePlayer, int iCityID
 
 #ifdef MOD_WAR_PHASE
 	if (GC.getGame().isWarPhase()) {
-		// TODO: Confirm the necessity of this exception.
-		if (eTask != TASK_CREATE_PUPPET && eTask != TASK_RAZE && eTask != TASK_ANNEX_PUPPET) {
+		if (eTask != TASK_CREATE_PUPPET && eTask != TASK_RAZE && eTask != TASK_ANNEX_PUPPET && eTask != TASK_RANGED_ATTACK) {
 			CUSTOMLOG("ERROR: Stahp touching your city! during war! Nope :)");
 			return;
 		}
+	}else if (eTask == TASK_RANGED_ATTACK){
+		CUSTOMLOG("ERROR: You can't attack with city during sim phase!");
+		return;
 	}
 #endif // 
 
