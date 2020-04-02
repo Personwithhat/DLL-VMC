@@ -2737,18 +2737,10 @@ void CvGame::selectedCitiesGameNetMessage(int eMessage, int iData2, int iData3, 
 	// It bypasses C++ here (for no apparent reason??)
 	// Need to improve all this anyway. Should simply not show the UI buttons, instead of 'silently' blocking action.
 #ifdef MOD_WAR_PHASE
-	if (isWarPhase()) {
-		// TODO: Confirm the necessity of this exception.
-		if (eMessage == GAMEMESSAGE_DO_TASK) {
-			TaskTypes task = (TaskTypes)iData2;
-			if (task != TASK_CREATE_PUPPET && task != TASK_RAZE && task != TASK_ANNEX_PUPPET) {
-				CUSTOMLOG("ERROR: Stahp touching your city! during war! Nope :)");
-				return;
-			}
-		} else {
-			CUSTOMLOG("ERROR: Tried to do something with city during war. Nope :)");
-			return;
-		}
+	// Task handled further down, since lua may bypass this/etc. >.>
+	if (isWarPhase() && eMessage != GAMEMESSAGE_DO_TASK) {
+		CUSTOMLOG("ERROR: Tried to do something with city during war. Nope :)");
+		return;
 	}
 #endif
 
