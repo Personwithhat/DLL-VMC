@@ -4871,19 +4871,27 @@ int CvGame::getMaxTurnLen(PlayerTypes playerID)
 	if (playerID == NO_PLAYER)
 		playerID = getActivePlayer();
 
+	CvUnit* pLoopUnit; int iLoop;
 	if (!isWarPhase()) {
 		// Find out who has the most units and who has the most cities
 		// Calculate the max turn time based on the max number of units and cities
 		// Simultaneous turn-timer.
 		for (int i = 0; i < MAX_CIV_PLAYERS; ++i)
 		{
-			if (GET_PLAYER((PlayerTypes)i).isAlive() && GET_PLAYER((PlayerTypes)i).isHuman())
+			CvPlayer& cPlayer = GET_PLAYER((PlayerTypes)i);
+			if (cPlayer.isAlive() && cPlayer.isHuman())
 			{
-				if (GET_PLAYER((PlayerTypes)i).getNumUnits() > iMaxUnits)
-					iMaxUnits = GET_PLAYER((PlayerTypes)i).getNumUnits();
+				// Only consider non-war units for simulation-phase turn timer.
+				int nonWarCount = 0;
+				for (pLoopUnit = cPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = cPlayer.nextUnit(&iLoop))
+					if (!pLoopUnit->getUnitInfo().IsWarPhaseOnly())
+						nonWarCount++;
 
-				if (GET_PLAYER((PlayerTypes)i).getNumCities() > iMaxCities)
-					iMaxCities = GET_PLAYER((PlayerTypes)i).getNumCities();
+				if (nonWarCount > iMaxUnits)
+					iMaxUnits = nonWarCount;
+
+				if (cPlayer.getNumCities() > iMaxCities)
+					iMaxCities = cPlayer.getNumCities();
 			}
 		}
 
@@ -4895,9 +4903,9 @@ int CvGame::getMaxTurnLen(PlayerTypes playerID)
 
 	} else {
 		// Any war-phase unit for current player adds 2 seconds to timer.
-		CvPlayer& lPlayer = GET_PLAYER(playerID);
+		CvPlayer& cPlayer = GET_PLAYER(playerID);
 		CvUnit* pLoopUnit; int iLoop;
-		for (pLoopUnit = lPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = lPlayer.nextUnit(&iLoop))
+		for (pLoopUnit = cPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = cPlayer.nextUnit(&iLoop))
 			if (pLoopUnit->getUnitInfo().IsWarPhaseOnly())
 				baseTurnTime += 2;
 
