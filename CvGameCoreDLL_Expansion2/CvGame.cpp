@@ -4873,9 +4873,8 @@ int CvGame::getMaxTurnLen(PlayerTypes playerID)
 
 	CvUnit* pLoopUnit; int iLoop;
 	if (!isWarPhase()) {
-		// Find out who has the most units and who has the most cities
-		// Calculate the max turn time based on the max number of units and cities
 		// Simultaneous turn-timer.
+		// Calculate the max turn time based on the max number of units and cities owned by HUMAN player.
 		for (int i = 0; i < MAX_CIV_PLAYERS; ++i)
 		{
 			CvPlayer& cPlayer = GET_PLAYER((PlayerTypes)i);
