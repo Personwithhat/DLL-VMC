@@ -136,6 +136,12 @@ public:
 
 	CvPlot *GetGreatAdmiralSpawnPlot (CvUnit *pUnit);
 
+#ifdef MOD_WAR_PHASE
+	void cacheTurnTimer(int tTime);
+	int getCachedTurnTimer() const;
+	int m_iCachedTurnTimer;
+#endif
+
 	int GetNumBuilders() const;
 	void SetNumBuilders(int iNum);
 	void ChangeNumBuilders(int iChange);

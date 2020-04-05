@@ -4123,6 +4123,13 @@ CvPlot *CvPlayer::GetGreatAdmiralSpawnPlot (CvUnit *pUnit)
 	return pInitialPlot;
 }
 
+//	--------------------------------------------------------------------------------
+void CvPlayer::cacheTurnTimer(int tTime) {
+	m_iCachedTurnTimer = tTime;
+};
+int CvPlayer::getCachedTurnTimer() const {
+	return m_iCachedTurnTimer;
+};
 
 //	--------------------------------------------------------------------------------
 /// The number of Builders a player has
