@@ -136,6 +136,10 @@ public:
 
 	CvPlot *GetGreatAdmiralSpawnPlot (CvUnit *pUnit);
 
+	void cacheTurnTimer(int tTime);
+	int getCachedTurnTimer() const;
+	int m_iCachedTurnTimer;
+
 	int GetNumBuilders() const;
 	void SetNumBuilders(int iNum);
 	void ChangeNumBuilders(int iChange);

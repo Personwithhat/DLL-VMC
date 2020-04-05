@@ -1932,7 +1932,7 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 				CvPlayer& curPlayer = GET_PLAYER(playerID);
 
 				// Has the turn expired?
-				float gameTurnEnd = static_cast<float>(getMaxTurnLen());
+				float gameTurnEnd = static_cast<float>(curPlayer.getCachedTurnTimer());
 
 				//NOTE:  These times exclude the time used for AI processing.
 				//Time since the current player's turn started.  Used for measuring time for players in sequential turn mode.
@@ -4670,6 +4670,17 @@ void CvGame::resetTurnTimer(bool resetGameTurnStart)
 	if(resetGameTurnStart)
 	{
 		m_timeSinceGameTurnStart.Start();
+	}
+
+	// Update cached turn-timers on timer reset
+	// Cached to avoid tick-down on unit death mid-turn.
+	for (int curPlayerIdx = 0; curPlayerIdx < MAX_CIV_PLAYERS; ++curPlayerIdx)
+	{
+		CvPlayer& kCurrentPlayer = GET_PLAYER((PlayerTypes)curPlayerIdx);
+		if (kCurrentPlayer.isHuman() && kCurrentPlayer.isAlive())
+		{
+			kCurrentPlayer.cacheTurnTimer(getMaxTurnLen());
+		}
 	}
 }
 
