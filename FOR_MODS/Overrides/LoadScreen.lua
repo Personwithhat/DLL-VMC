@@ -1,168 +1,143 @@
-include( "IconSupport" );
-include( "UniqueBonuses" );
+-------------------------------------------------
+-- Game Loading Screen
+-- modified by bc1 from 1.0.3.144 code
+-------------------------------------------------
+include( "EUI_utilities" )
+local IconHookup = EUI.IconHookup
+local CivIconHookup = EUI.CivIconHookup
+local SimpleCivIconHookup = EUI.SimpleCivIconHookup
+include( "PopulateUniques" )
+local InitializePopulateUniques = InitializePopulateUniques
+local PopulateUniquesForGameLoad = PopulateUniquesForGameLoad
+local math_min = math.min
+local math_max = math.max
 
-local iCivID = -1;
-local g_bLoadComplete;
-
-function ShowHide( isHide, isInit )
-	if ( not isInit ) then
-		if ( isHide == true ) then
-			UIManager:SetUICursor( 0 );
-			Controls.Image:UnloadTexture();
-			--print("Texture is unloaded");
-			if (iCivID ~= -1) then
-				Events.SerialEventDawnOfManHide(iCivID);
-			end
-		else
-			OnInitScreen();
-			UIManager:SetUICursor( 1 );
-			if (iCivID ~= -1) then
-				Events.SerialEventDawnOfManShow(iCivID);        
-			end
-		end
-	end
-	
-	if(not isHide) then
-		UI.SetDontShowPopups(true);
-	end
-end
-ContextPtr:SetShowHideHandler( ShowHide );
+local g_civID = -1;
+local g_isLoadComplete = false;
 
 Controls.ProgressBar:SetPercent( 1 );
 
-function OnInitScreen()
-	
-	g_bLoadComplete = false;
-	
-    Controls.AlphaAnim:SetToBeginning();
-    Controls.SlideAnim:SetToBeginning();
-	Controls.ActivateButton:SetHide(true);
-	
-	local civIndex = PreGame.GetCivilization( Game:GetActivePlayer() );
-    
-    local civ = GameInfo.Civilizations[civIndex];
-    
-    if(civ == nil) then
-		PreGame.SetCivilization(0, -1);
-	end
-	
-    if ( not PreGame.IsMultiplayerGame() ) then
-		-- Force some settings off when loading a HotSeat game.
-        PreGame.SetGameOption("GAMEOPTION_DYNAMIC_TURNS", false);
-        PreGame.SetGameOption("GAMEOPTION_SIMULTANEOUS_TURNS", false);
-        PreGame.SetGameOption("GAMEOPTION_PITBOSS", false);
-    end	
-    
-    -- Sets up Selected Civ Slot
-    if( civ ~= nil ) then
-		
-        -- Use the Civilization_Leaders table to cross reference from this civ to the Leaders table
-        local leader = GameInfo.Leaders[GameInfo.Civilization_Leaders( "CivilizationType = '" .. civ.Type .. "'" )().LeaderheadType];
-        local leaderDescription = leader.Description;
+ContextPtr:SetShowHideHandler( 
+function( isHide, isInit )
+	if not isHide then
+		UI.SetDontShowPopups(true);
+		if not isInit then
+			UIManager:SetUICursor( 1 );
+			g_isLoadComplete = false;
 
-		-- Set Leader & Civ Text
-		Controls.Civilization:LocalizeAndSetText( civ.Description );
-		Controls.Leader:LocalizeAndSetText( leaderDescription );
-        
-        -- Set Civ Leader Icon
-		IconHookup( leader.PortraitIndex, 128, leader.IconAtlas, Controls.Portrait );
-		
-		-- Set Civ Icon
-		SimpleCivIconHookup( Game.GetActivePlayer(), 80, Controls.IconShadow );
-		
-		-- Sets Trait bonus Text
-        local leaderTrait = GameInfo.Leader_Traits("LeaderType ='" .. leader.Type .. "'")();
-        local trait = leaderTrait.TraitType;
-        Controls.BonusTitle:SetText( Locale.ConvertTextKey( GameInfo.Traits[trait].ShortDescription ));
-        Controls.BonusDescription:SetText( Locale.ConvertTextKey( GameInfo.Traits[trait].Description ));
-        
-         -- Sets Bonus Icons
-        local bonusText = PopulateUniqueBonuses( Controls, civ, leader, false, true);
-        
-        Controls.BonusUnit:LocalizeAndSetText( bonusText[1] or "" );
-        Controls.BonusBuilding:LocalizeAndSetText( bonusText[2] or "" );
-        
-        -- Sets Dawn of Man Quote
-        Controls.Quote:LocalizeAndSetText(civ.DawnOfManQuote or "");
-        
-        -- Sets Dawn of Man Image
-        Controls.Image:SetTexture(civ.DawnOfManImage);
-		iCivID = civ.ID;
-        --print("iCivID: " .. iCivID);
-	end
-	
-	
-end      
+			Controls.AlphaAnim:SetToBeginning();
+--			Controls.SlideAnim:SetToBeginning();
+			Controls.ActivateButton:SetHide(true);
 
-function OnActivateButtonClicked ()
+			-- Force some settings off when loading a HotSeat game.
+			if not PreGame.IsMultiplayerGame() then
+				PreGame.SetGameOption("GAMEOPTION_DYNAMIC_TURNS", false);
+				PreGame.SetGameOption("GAMEOPTION_SIMULTANEOUS_TURNS", false);
+				PreGame.SetGameOption("GAMEOPTION_PITBOSS", false);
+			end
+
+			-- Sets up Selected Civ Slot
+			local civ = GameInfo.Civilizations[ PreGame.GetCivilization( Game:GetActivePlayer() ) ];
+			if civ then
+				g_civID = civ.ID;
+				-- Use the Civilization_Leaders table to cross reference from this civ to the Leaders table
+				local leader = GameInfo.Leaders[ GameInfo.Civilization_Leaders{ CivilizationType = civ.Type }().LeaderheadType ];
+
+				-- Set Leader & Civ Text
+				Controls.Civilization:LocalizeAndSetText( civ.Description );
+				Controls.Leader:LocalizeAndSetText( leader.Description );
+				-- Set Civ Leader Icon
+-- there is no Portrait!!!	IconHookup( leader.PortraitIndex, 128, leader.IconAtlas, Controls.Portrait );
+
+				-- Set Civ Icon
+				SimpleCivIconHookup( Game.GetActivePlayer(), 80, Controls.IconShadow );
+
+				-- Sets Trait bonus Text
+				local trait = GameInfo.Traits[ GameInfo.Leader_Traits{ LeaderType = leader.Type }().TraitType ];
+				Controls.BonusTitle:LocalizeAndSetText( trait.ShortDescription );
+				Controls.BonusDescription:LocalizeAndSetText( trait.Description );
+
+				-- Sets Bonus Icons
+				InitializePopulateUniques();
+				Controls.SubStack:DestroyAllChildren();
+				PopulateUniquesForGameLoad( Controls.SubStack, civ.Type );
+
+				-- Sets Dawn of Man Quote
+				Controls.Quote:LocalizeAndSetText( civ.DawnOfManQuote or "" );
+
+				-- Sets Dawn of Man Image
+				Controls.Image:SetTexture(civ.DawnOfManImage);
+				local x, y = UIManager:GetScreenSizeVal()
+				local a = math_min( x-500, y/0.75 )
+				local b = math_max( 500, x-a )
+				Controls.Image:Resize( a, 0.75*a )
+				Controls.Details:SetSizeX( b )
+--				Controls.BonusDescription:SetWrapWidth( b*0.9 )
+--				Controls.Quote:SetWrapWidth( b*0.9 )
+				Controls.Details:ReprocessAnchoring();
+			else
+				g_civID = -1;
+				PreGame.SetCivilization( 0, -1 );
+			end
+			if g_civID ~= -1 then
+				Events.SerialEventDawnOfManShow(g_civID);
+			end
+		end
+	elseif not isInit then
+		UIManager:SetUICursor( 0 );
+		Controls.Image:UnloadTexture();
+		--print("Texture is unloaded");
+		if g_civID ~= -1 then
+			Events.SerialEventDawnOfManHide(g_civID);
+		end
+	end
+end );
+-------------
+-- Start Game
+-------------
+local function OnActivateButtonClicked ()
 	--print("Activate button clicked!");
 	Events.LoadScreenClose();
-	if (not PreGame.IsMultiplayerGame() and not PreGame.IsHotSeatGame()) then
-		Game.SetPausePlayer(-1);
+	if not PreGame.IsMultiplayerGame() and not PreGame.IsHotSeatGame() then
+		Game.SetPausePlayer( -1 );
 	end
-	
-	UI.SetDontShowPopups(false);
-	
+
+	UI.SetDontShowPopups( false );
+
 	--UI.SetNextGameState( GameStates.MainGameView, g_iAIPlayer );
 end
 Controls.ActivateButton:RegisterCallback( Mouse.eLClick, OnActivateButtonClicked );
 
 
-----------------------------------------------------------------        
+----------------------
 -- Key Down Processing
-----------------------------------------------------------------        
-function InputHandler( uiMsg, wParam, lParam )
-    if( uiMsg == KeyEvents.KeyDown )
-    then
-        if( wParam == Keys.VK_ESCAPE or wParam == Keys.VK_RETURN ) then
-			if (g_bLoadComplete) then
-				OnActivateButtonClicked();
-			end
-        end
-    end
-    return true;
-end
-ContextPtr:SetInputHandler( InputHandler );
+----------------------
+ContextPtr:SetInputHandler(
+function( uiMsg, wParam, lParam )
+	if g_isLoadComplete
+		and uiMsg == KeyEvents.KeyDown
+		and ( wParam == Keys.VK_ESCAPE or wParam == Keys.VK_RETURN )
+	then
+		OnActivateButtonClicked();
+	end
+	return true;
+end );
 
-function HideBackgrounds ()
-	Controls.AlphaAnim:Play();
-	Controls.SlideAnim:Play();
-end
+---------------------
+-- Game Init complete
+---------------------
+Events.SequenceGameInitComplete.Add(
+function()
+	g_isLoadComplete = true;
 
-function OnSequenceGameInitComplete ()
-	
-	g_bLoadComplete = true;	
-	
-	if (PreGame.IsMultiplayerGame() or PreGame.IsHotSeatGame()) then
+	if PreGame.IsMultiplayerGame() or PreGame.IsHotSeatGame() then
 		OnActivateButtonClicked();
 	else
-		Game.SetPausePlayer(Game.GetActivePlayer());
-		local strGameButtonName;
-		if (not UI:IsLoadedGame()) then
-			strGameButtonName = Locale.ConvertTextKey("TXT_KEY_BEGIN_GAME_BUTTON");
-		else
-			strGameButtonName = Locale.ConvertTextKey("TXT_KEY_BEGIN_GAME_BUTTON_CONTINUE");
-		end
-	
-		Controls.ActivateButtonText:SetText(strGameButtonName);
+		Game.SetPausePlayer( Game.GetActivePlayer() );
+		Controls.ActivateButtonText:LocalizeAndSetText( UI:IsLoadedGame() and "TXT_KEY_BEGIN_GAME_BUTTON_CONTINUE" or "TXT_KEY_BEGIN_GAME_BUTTON" );
 		Controls.ActivateButton:SetHide(false);
-		HideBackgrounds();
-        UIManager:SetUICursor( 0 );	
-        
-        -- Update Icons to now have tooltips.
-        local civIndex = PreGame.GetCivilization( Game:GetActivePlayer() );
-        local civ = GameInfo.Civilizations[civIndex];
-    
-		-- Sets up Selected Civ Slot
-		if( civ ~= nil ) then
-			
-			-- Use the Civilization_Leaders table to cross reference from this civ to the Leaders table
-			local leader = GameInfo.Leaders[GameInfo.Civilization_Leaders( "CivilizationType = '" .. civ.Type .. "'" )().LeaderheadType];
-
-			 -- Sets Bonus Icons
-			local bonusText = PopulateUniqueBonuses( Controls, civ, leader, true, false);
-		end
+		Controls.AlphaAnim:Play();
+--		Controls.SlideAnim:Play();
+		UIManager:SetUICursor( 0 );
 	end
-end
-
-Events.SequenceGameInitComplete.Add( OnSequenceGameInitComplete );
+end );
