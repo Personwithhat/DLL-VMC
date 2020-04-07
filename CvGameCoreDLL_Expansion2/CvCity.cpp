@@ -8210,7 +8210,7 @@ void CvCity::DoJONSCultureLevelIncrease()
 #if defined(MOD_GLOBAL_CITY_WORKING)
 			bool bCanAcquirePlot = plotDistance(getX(), getY(), pPlotToAcquire->getX(), pPlotToAcquire->getY()) <= getWorkPlotDistance();
 #else
-			bool bCanAcquirePlot = plotDistance(getX(), getY(), pPlotToAcquire->getX(), pPlotToAcquire->getY()) <= CITY_PLOTS_RADIUS);
+			bool bCanAcquirePlot = plotDistance(getX(), getY(), pPlotToAcquire->getX(), pPlotToAcquire->getY()) <= CITY_PLOTS_RADIUS;
 #endif
 			if (bCanAcquirePlot && GetBuyPlotCost(pPlotToAcquire->getX(), pPlotToAcquire->getY()) < 1) {
 				// Within working/buying distance
