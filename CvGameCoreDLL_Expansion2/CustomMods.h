@@ -125,8 +125,9 @@
 #define MOD_GLOBAL_CITY_FOREST_BONUS                gCustomMods.isGLOBAL_CITY_FOREST_BONUS()
 // Give initial production boost for cities founded on jungle, as if the jungle had been chopped down by a worker (v72)
 #define MOD_GLOBAL_CITY_JUNGLE_BONUS                gCustomMods.isGLOBAL_CITY_JUNGLE_BONUS()
+// PERSONAL NOTE: Off since EUI depends on CITY_PLOTS_RADIUS define, which is renamed to MAX_CITY_RADIUS etc.
 // Permit cities to work tiles up to MAXIMUM_ACQUIRE_PLOT_DISTANCE - WARNING! Cities take 2.5 times as much memory/file space
-#define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
+//#define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
 // Permit cities to have automaton workers (v89)
 #define MOD_GLOBAL_CITY_AUTOMATON_WORKERS           gCustomMods.isGLOBAL_CITY_AUTOMATON_WORKERS()
 // Enables rebasing to and airlifting to/from improvements (v74)
@@ -220,7 +221,7 @@
 // Permits land units to cross ice - AFFECTS SAVE GAME DATA FORMAT
 #define MOD_TRAITS_CROSSES_ICE                      gCustomMods.isTRAITS_CROSSES_ICE()
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
-#define MOD_TRAITS_CITY_WORKING                     gCustomMods.isTRAITS_CITY_WORKING()
+//#define MOD_TRAITS_CITY_WORKING                     gCustomMods.isTRAITS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
 #define MOD_TRAITS_CITY_AUTOMATON_WORKERS           gCustomMods.isTRAITS_CITY_AUTOMATON_WORKERS()
 // Enables traits to be enabled/obsoleted via beliefs and policies (v77)
@@ -233,12 +234,12 @@
 #define MOD_TRAITS_EXTRA_SUPPLY                     gCustomMods.isTRAITS_EXTRA_SUPPLY()
 
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
-#define MOD_POLICIES_CITY_WORKING                   gCustomMods.isPOLICIES_CITY_WORKING()
+//#define MOD_POLICIES_CITY_WORKING                   gCustomMods.isPOLICIES_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
 #define MOD_POLICIES_CITY_AUTOMATON_WORKERS         gCustomMods.isPOLICIES_CITY_AUTOMATON_WORKERS()
 
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
-#define MOD_TECHS_CITY_WORKING                      gCustomMods.isTECHS_CITY_WORKING()
+//#define MOD_TECHS_CITY_WORKING                      gCustomMods.isTECHS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v89)
 #define MOD_TECHS_CITY_AUTOMATON_WORKERS            gCustomMods.isTECHS_CITY_AUTOMATON_WORKERS()
 
@@ -275,7 +276,7 @@
 // Purchase of buildings in cities allows for any current production
 #define MOD_BUILDINGS_PRO_RATA_PURCHASE             gCustomMods.isBUILDINGS_PRO_RATA_PURCHASE()
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
-#define MOD_BUILDINGS_CITY_WORKING                  gCustomMods.isBUILDINGS_CITY_WORKING()
+//#define MOD_BUILDINGS_CITY_WORKING                  gCustomMods.isBUILDINGS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
 #define MOD_BUILDINGS_CITY_AUTOMATON_WORKERS        gCustomMods.isBUILDINGS_CITY_AUTOMATON_WORKERS()
 
