@@ -443,6 +443,7 @@ void CvLuaGame::RegisterMembers(lua_State* L)
 	Method(AnyoneHasTech);
 	Method(AnyoneHasUnit);
 	Method(AnyoneHasUnitClass);
+	Method(isWarPhase);
 	Method(GameDoneLoading);
 #endif
 }
@@ -3397,6 +3398,12 @@ int CvLuaGame::lGameDoneLoading(lua_State* L)
 		CUSTOMLOG("INPUT: Disabling Input - Initial load. Not active yet.");
 		GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
 	}
+	return 1;
+}
+
+int CvLuaGame::lisWarPhase(lua_State* L)
+{
+	lua_pushboolean(L, GC.getGame().isWarPhase());
 	return 1;
 }
 

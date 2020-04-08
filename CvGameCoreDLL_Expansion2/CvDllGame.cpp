@@ -107,7 +107,7 @@ TeamTypes CvDllGame::GetActiveTeam()
 //------------------------------------------------------------------------------
 int CvDllGame::GetGameTurn() const
 {
-	return m_pGame->getGameTurn();
+	return m_pGame->getFakeGameTurn();
 }
 //------------------------------------------------------------------------------
 void CvDllGame::ChangeNumGameTurnActive(int iChange, const char* why)

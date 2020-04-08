@@ -33,7 +33,7 @@
  ****************************************************************************/
 #define MOD_DLL_GUID { 0xe1bde3ad, 0x8320, 0x466b, { 0xb4, 0xde, 0x5c, 0x5b, 0x8d, 0xa8, 0xfc, 0x87 } } // {E1BDE3AD-8320-466B-B4DE-5C5B8DA8FC87}
 #define MOD_DLL_NAME "CalzMod"
-#define MOD_DLL_VERSION_NUMBER ((uint) 94)
+#define MOD_DLL_VERSION_NUMBER ((uint) 95)
 #define MOD_DLL_VERSION_STATUS ""			// a (alpha), b (beta) or blank (released)
 #define MOD_DLL_CUSTOM_BUILD_NAME ""
 
@@ -322,6 +322,11 @@
 
 // Enables production to be stockpiled (v28)
 #define MOD_PROCESS_STOCKPILE                       gCustomMods.isPROCESS_STOCKPILE()
+
+// Enforces a separate sequential 'war-phase' for simultaneous mode.
+#define MOD_WAR_PHASE								true
+// Just for debug, to not block certain actions.
+#define MOD_WAR_PHASE_BLOCK							true
 
 // Stops the AI from adding zero-value items (eg late game horses) into trade offers (v85)
 #define MOD_AI_NO_ZERO_VALUE_TRADE_ITEMS            gCustomMods.isAI_NO_ZERO_VALUE_TRADE_ITEMS()

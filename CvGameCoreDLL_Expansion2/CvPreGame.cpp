@@ -215,6 +215,8 @@ PREGAMEVARDEFAULT(CvString,                           s_gameName);
 PREGAMEVAR(GameSpeedTypes,                     s_gameSpeed,              NO_GAMESPEED);
 PREGAMEVAR(bool,                               s_gameStarted,            false);
 PREGAMEVAR(int,                                s_gameTurn,               -1);
+PREGAMEVAR(int,                                s_fakeGameTurn,           -1);
+
 #if defined(MOD_API_EXTENSIONS)
 GameTypes s_pushedGameType = GAME_TYPE_NONE;
 #endif
@@ -1074,6 +1076,11 @@ bool gameStarted()
 int gameTurn()
 {
 	return s_gameTurn;
+}
+
+int fakeGameTurn()
+{
+	return s_fakeGameTurn;
 }
 
 GameTypes gameType()
@@ -2534,7 +2541,10 @@ void setGameTurn(int turn)
 {
 	s_gameTurn = turn;
 }
-
+void setFakeGameTurn(int turn)
+{
+	s_fakeGameTurn = turn;
+}
 void setGameType(GameTypes g, GameStartTypes eStartType)
 {
 #if defined(MOD_BUGFIX_MINOR)

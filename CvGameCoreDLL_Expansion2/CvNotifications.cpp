@@ -646,6 +646,21 @@ bool CvNotifications::GetEndTurnBlockedType(EndTurnBlockingTypes& eBlockingType,
 	eBlockingType = NO_ENDTURN_BLOCKING_TYPE;
 	iNotificationIndex = -1;
 
+#ifdef MOD_WAR_PHASE
+	/*
+	These two only active end-turn blockers for War Phase:
+		ENDTURN_BLOCKING_STACKED_UNITS
+		ENDTURN_BLOCKING_UNITS
+
+	And stacked-units without movement available remain where they are.
+	Without triggering the ENDTURN_BLOCKING_STACKED_UNITS notification.
+
+	So 2 workers during war-phase are fine to stay stacked until sim phase.
+	*/
+	if (GC.getGame().isWarPhase())
+		return false;
+#endif
+
 	int iIndex = m_iNotificationsBeginIndex;
 	while(iIndex != m_iNotificationsEndIndex)
 	{

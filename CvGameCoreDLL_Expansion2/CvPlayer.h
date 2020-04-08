@@ -179,6 +179,7 @@ public:
 	const CvString getWorstEnemyName() const;
 	ArtStyleTypes getArtStyleType() const;
 
+	void calcTurn(); // Simple hack to keep flow the same as before xd
 	void doTurn();
 	void doTurnPostDiplomacy();
 	void doTurnUnits();

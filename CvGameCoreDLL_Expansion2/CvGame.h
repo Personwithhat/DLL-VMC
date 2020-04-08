@@ -147,6 +147,10 @@ public:
 	int getNumHumansInHumanWars(PlayerTypes ignorePlayer = NO_PLAYER);
 	int getNumSequentialHumans(PlayerTypes ignorePlayer = NO_PLAYER);
 
+	int getFakeGameTurn();
+	void setFakeGameTurn(int iNewValue);
+	void incrementFakeGameTurn();
+
 	int getGameTurn();
 	void setGameTurn(int iNewValue);
 	void incrementGameTurn();
@@ -234,6 +238,10 @@ public:
 
 	bool isScoreDirty() const;
 	void setScoreDirty(bool bNewValue);
+
+#ifdef MOD_WAR_PHASE
+	bool isWarPhase() const;
+#endif
 
 	bool isCircumnavigated() const;
 	void makeCircumnavigated();
@@ -627,6 +635,7 @@ private:
 	const static unsigned int ms_aiSizes[10];
 
 protected:
+	bool m_bWarPhase;
 
 	int m_iEndTurnMessagesSent;
 	int m_iElapsedGameTurns;
