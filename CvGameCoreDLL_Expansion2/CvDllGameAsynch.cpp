@@ -86,7 +86,7 @@ TeamTypes CvDllGameAsynch::GetActiveTeam()
 //------------------------------------------------------------------------------
 int CvDllGameAsynch::GetGameTurn() const
 {
-	return m_pGame->getGameTurn();
+	return m_pGame->getFakeGameTurn();
 }
 //------------------------------------------------------------------------------
 GameSpeedTypes CvDllGameAsynch::GetGameSpeedType() const

@@ -147,6 +147,10 @@ public:
 	int getNumHumansInHumanWars(PlayerTypes ignorePlayer = NO_PLAYER);
 	int getNumSequentialHumans(PlayerTypes ignorePlayer = NO_PLAYER);
 
+	int getFakeGameTurn();
+	void setFakeGameTurn(int iNewValue);
+	void incrementFakeGameTurn();
+
 	int getGameTurn();
 	void setGameTurn(int iNewValue);
 	void incrementGameTurn();

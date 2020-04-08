@@ -306,6 +306,7 @@ void CvGame::init(HandicapTypes eHandicap)
 		iStartTurn /= 100;
 
 		setGameTurn(iStartTurn);
+		setFakeGameTurn(iStartTurn);
 
 		if (kEraInfo.isNoReligion())
 		{
@@ -1519,22 +1520,33 @@ void CvGame::update()
 						GC.GetEngineUserInterface()->setCanEndTurn(false);
 						GC.GetEngineUserInterface()->setHasMovedUnit(false);
 
+						incrementFakeGameTurn();
 						// incrementGameTurn() -> setGameTurn()
+						int iNewValue = getGameTurn();
 						{
-							//GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
-							//GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
+							std::string turnMessage = std::string("Game Turn ") + FSerialization::toString(iNewValue) + std::string("\n");
+							gDLL->netMessageDebugLog(turnMessage);
+
+							//CvPreGame::setGameTurn(iNewValue);
+							//CvAssert(getGameTurn() >= 0);
+
+							setScoreDirty(true);
+
+							GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
+							GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
 							m_sentAutoMoves = false;
 							gDLL->GameplayTurnChanged(getGameTurn());
 							endTurnTimerReset();
 						}
 
-						gDLL->PublishNewGameTurn(getGameTurn());
+						gDLL->PublishNewGameTurn(iNewValue);
 
 					//***
 					//*** Game flow simulation
 					//***
 						// Pretend all AI civ's just finished processing.
 						gDLL->SendAICivsProcessed();
+						//m_lastTurnAICivsProcessed = getGameTurn();
 
 						// Activate human players with simultaneous turns now, after war-phase.
 						for (int iI = 0; iI < MAX_PLAYERS; iI++)
@@ -4604,6 +4616,16 @@ int CvGame::getGameTurn()
 	return CvPreGame::gameTurn();
 }
 
+int CvGame::getFakeGameTurn() {
+	return CvPreGame::fakeGameTurn();
+};
+void CvGame::setFakeGameTurn(int iNewValue)
+{
+	CvPreGame::setFakeGameTurn(iNewValue);
+}
+void CvGame::incrementFakeGameTurn() {
+	setFakeGameTurn(getFakeGameTurn() + 1);
+};
 //	------------------------------------------------------------------------------------------------
 void CvGame::setGameTurn(int iNewValue)
 {
@@ -7905,6 +7927,7 @@ void CvGame::doTurn()
 		}
 	}
 
+	incrementFakeGameTurn();
 	incrementGameTurn();
 	incrementElapsedGameTurns();
 

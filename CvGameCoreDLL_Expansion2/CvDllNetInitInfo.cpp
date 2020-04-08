@@ -247,6 +247,7 @@ bool CvDllNetInitInfo::Commit()
 	CvPreGame::setEra(m_eEra);
 	CvPreGame::setCalendar(m_eCalendar);
 	CvPreGame::setGameTurn(m_iGameTurn);
+	CvPreGame::setFakeGameTurn(m_iGameTurn);
 	CvPreGame::setGameStarted(m_bGameStarted);
 	CvPreGame::setGameSpeed(m_eGameSpeed);
 	CvPreGame::setTurnTimer(m_eTurnTimerEnabled);

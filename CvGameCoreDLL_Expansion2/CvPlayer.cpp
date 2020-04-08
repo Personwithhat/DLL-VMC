@@ -27925,7 +27925,7 @@ void CvPlayer::doArmySize()
 //	--------------------------------------------------------------------------------
 void CvPlayer::checkInitialTurnAIProcessed()
 {
-	int turn = GC.getGame().getGameTurn();
+	int turn = GC.getGame().getFakeGameTurn();
 	if(m_lastGameTurnInitialAIProcessed != turn)
 	{
 		//Note: Players that are not turn active at the beginning of the game turn will 
