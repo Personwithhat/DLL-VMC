@@ -1511,11 +1511,12 @@ void CvGame::update()
 						doTurn();
 					else {
 					//***
-					//*** Minimal doTurn(). TODO: Remove any that are unecessary?
+					//*** Minimal doTurn(). These are all necessary, some issues can only be hit when more than 1 human in game.
 					//***
 						// Obfuscated DLL stuff.
-						gDLL->DoTurn();
 						GC.GetEngineUserInterface()->setNoSelectionListCycle(false);
+						gDLL->DoTurn();
+						GC.getMap().doTurn();
 						GC.GetEngineUserInterface()->doTurn();
 						GC.GetEngineUserInterface()->setCanEndTurn(false);
 						GC.GetEngineUserInterface()->setHasMovedUnit(false);
@@ -1764,8 +1765,12 @@ void CvGame::CheckPlayerTurnDeactivate()
 												}
 												else
 												{
-													kNextPlayer.setTurnActive(true);
-													resetTurnTimer(false);
+													// TODO: It is handing off here, after the last war-phase player ends
+													// It goes ahead and turns to the next one! BDING, WRONG! wtf.
+													if (!gDLL->HasReceivedTurnComplete(kNextPlayer.GetID())) {
+														kNextPlayer.setTurnActive(true);
+														resetTurnTimer(false);
+													}
 												}
 												break;
 											}
@@ -3103,7 +3108,7 @@ bool CvGame::canHandleAction(int iAction, CvPlot* pPlot, bool bTestVisible)
 	CvAssert(pActionInfo != NULL);
 	if(!pActionInfo) return false;
 
-	// PERSONAL TODO: Move other stuff here, as well?
+	// PERSONAL TODO: Move other stuff here, as well!! (Similar to check below for isSimultaneousTurns, should work safely!)
 	// This is to hide the promotion pop-up on unit during war phase.
 	// UnitPanel.lua is affected by this.
 	if (isWarPhase() && pActionInfo->getSubType() == ACTIONSUBTYPE_PROMOTION)

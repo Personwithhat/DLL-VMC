@@ -17643,6 +17643,7 @@ void CvPlayer::setAlive(bool bNewValue, bool bNotify)
 
 			GET_TEAM(getTeam()).SetKilledByTeam(NO_TEAM);
 
+			// PERSONAL TODO: This is what lets you all move on turn 0 simultaneously, even in WAR_PHASE!
 			if(isSimultaneousTurns() || (GC.getGame().getNumGameTurnActive() == 0) || (GC.getGame().isSimultaneousTeamTurns() && GET_TEAM(getTeam()).isTurnActive()))
 			{
 				setTurnActive(true);
@@ -17989,6 +17990,12 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			{
 				DLLUI->PublishActivePlayerTurnEnd();
 				CUSTOMLOG("PublishActivePlayerTurnEnd");
+			} 
+			else if (isHuman() && kGame.isGameMultiPlayer()) 
+			{
+				// PERSONAL TODO: Is this necessary? Maybe called by DLL internally xd 
+				DLLUI->PublishRemotePlayerTurnEnd();
+				CUSTOMLOG("PublishRemotePlayerTurnEnd");
 			}
 
 			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && gDLL->HasReceivedTurnAllComplete(GetID())) || kGame.getAIAutoPlay())
