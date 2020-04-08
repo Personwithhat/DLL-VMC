@@ -689,7 +689,10 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 		SetImmobile(true);
 	}
 
-	setMoves(maxMoves());
+#ifdef MOD_WAR_PHASE
+	if (!kPlayer.isHuman() || GC.getGame().isWarPhase() == getUnitInfo().IsWarPhaseOnly())
+#endif
+		setMoves(maxMoves());
 
 	// Religious unit? If so takes religion from city
 	if (getUnitInfo().IsSpreadReligion() || getUnitInfo().IsRemoveHeresy())

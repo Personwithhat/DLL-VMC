@@ -961,6 +961,17 @@ bool CvUnitEntry::IsMilitaryProduction() const
 	return m_bMilitaryProduction;
 }
 
+#ifdef MOD_WAR_PHASE
+/// Can this unit move only during war phase?
+bool CvUnitEntry::IsWarPhaseOnly() const
+{
+	return IsMilitaryProduction() ||
+		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL") ||
+		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL") ||
+		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_SETTLER");
+}
+#endif // MOD_WAR_PHASE
+
 /// Can this unit pillage?
 bool CvUnitEntry::IsPillage() const
 {

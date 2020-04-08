@@ -4608,7 +4608,7 @@ ArtStyleTypes CvPlayer::getArtStyleType() const
 //	---------------------------------------------------------------------------
 void CvPlayer::doTurn()
 {
-	// CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription())
+	//CUSTOMLOG("***** STARTING TURN %i for player %i (%s)", GC.getGame().getGameTurn(), GetID(), getCivilizationShortDescription());
 	// Time building of these maps
 	AI_PERF_FORMAT("AI-perf.csv", ("CvPlayer::doTurn(), Turn %d, %s", GC.getGame().getGameTurn(), getCivilizationShortDescription()));
 
@@ -4857,6 +4857,7 @@ void CvPlayer::doTurnPostDiplomacy()
 	// Science
 	doResearch();
 
+	// PERSONAL TODO: Maybe espionage should happen before research?
 	GetEspionage()->DoTurn();
 
 	// Faith
@@ -5039,6 +5040,17 @@ void CvPlayer::DoUnitReset()
 
 	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 	{
+#ifdef MOD_WAR_PHASE
+		// Refresh units that do belong to the phase we are in
+		// Other units should have moves wiped.
+		if (isHuman()) {
+			if (GC.getGame().isWarPhase() != pLoopUnit->getUnitInfo().IsWarPhaseOnly()) {
+				pLoopUnit->finishMoves();
+				continue;
+			}
+		}
+#endif // MOD_WAR_PHASE
+
 		// HEAL UNIT?
 		if(!pLoopUnit->isEmbarked())
 		{
@@ -5058,6 +5070,7 @@ void CvPlayer::DoUnitReset()
 			}
 		}
 
+		// PERSONAL TODO: Citadel damage calculated here .-.
 		int iCitadelDamage;
 		if(pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
 		{
@@ -17791,7 +17804,64 @@ void CvPlayer::setTurnActiveForPbem(bool bActive)
 		GC.getGame().changeNumGameTurnActive(isTurnActive() ? 1 : -1, "setTurnActiveForPlayByEmail");
 	}
 }
+//	--------------------------------------------------------------------------------
+void CvPlayer::calcTurn() {
+	CvGame& kGame = GC.getGame();
+	if (kGame.getActivePlayer() == m_eID)
+	{
+		CvMap& theMap = GC.getMap();
+		theMap.updateDeferredFog();
+	}
 
+	DoUnitAttrition();
+	SetAllUnitsUnprocessed();
+
+	bool bCommonPathFinderMPCaching = GC.getPathFinder().SetMPCacheSafe(true);
+	bool bIgnoreUnitsPathFinderMPCaching = GC.getIgnoreUnitsPathFinder().SetMPCacheSafe(true);
+	bool bTacticalPathFinderMPCaching = GC.GetTacticalAnalysisMapFinder().SetMPCacheSafe(true);
+	bool bInfluencePathFinderMPCaching = GC.getInfluenceFinder().SetMPCacheSafe(true);
+	bool bRoutePathFinderMPCaching = GC.getRouteFinder().SetMPCacheSafe(true);
+	bool bWaterRoutePathFinderMPCaching = GC.GetWaterRouteFinder().SetMPCacheSafe(true);
+
+	{
+		AI_PERF_FORMAT("AI-perf.csv", ("Connections/Gold, Turn %03d, %s", kGame.getElapsedGameTurns(), getCivilizationShortDescription()));
+
+		// This block all has things which might change based on city connections changing
+		m_pCityConnections->Update();
+		GetTreasury()->DoUpdateCityConnectionGold();
+		DoUpdateHappiness();
+	}
+
+	{
+		AI_PERF_FORMAT("AI-perf.csv", ("Builder Tasking, Turn %03d, %s", kGame.getElapsedGameTurns(), getCivilizationShortDescription()));
+
+		m_pBuilderTaskingAI->Update();
+	}
+
+	if (kGame.isFinalInitialized())
+	{
+		if (isAlive())
+		{
+			if (GetDiplomacyRequests())
+			{
+				GetDiplomacyRequests()->BeginTurn();
+			}
+
+			doTurn();
+
+			doTurnUnits();
+		}
+	}
+
+	GC.getPathFinder().SetMPCacheSafe(bCommonPathFinderMPCaching);
+	GC.getIgnoreUnitsPathFinder().SetMPCacheSafe(bIgnoreUnitsPathFinderMPCaching);
+	GC.GetTacticalAnalysisMapFinder().SetMPCacheSafe(bTacticalPathFinderMPCaching);
+	GC.getInfluenceFinder().SetMPCacheSafe(bInfluencePathFinderMPCaching);
+	GC.getRouteFinder().SetMPCacheSafe(bRoutePathFinderMPCaching);
+	GC.GetWaterRouteFinder().SetMPCacheSafe(bWaterRoutePathFinderMPCaching);
+
+	DoUnitReset();
+}
 
 //	--------------------------------------------------------------------------------
 void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
@@ -17800,6 +17870,7 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 	{
 		m_bTurnActive = bNewValue;
 		DLLUI->PublishEndTurnDirty();
+		//CUSTOMLOG("PublishEndTurnDirty");
 
 		CvGame& kGame = GC.getGame();
 
@@ -17812,14 +17883,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			CvAssertMsg(isAlive(), "isAlive is expected to be true");
 
 			setEndTurn(false);
-
-			DoUnitAttrition();
-
-			if(kGame.getActivePlayer() == m_eID)
-			{
-				CvMap& theMap = GC.getMap();
-				theMap.updateDeferredFog();
-			}
 
 			if((kGame.isHotSeat() || kGame.isPbem()) && isHuman() && bDoTurn)
 			{
@@ -17841,65 +17904,20 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			kGame.changeNumGameTurnActive(1, infoStream.str());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
+			//CUSTOMLOG("PublishPlayerTurnStatus START");
 
 			if(bDoTurn)
+				calcTurn();
+
+			if((GetID() == kGame.getActivePlayer()) && (kGame.getElapsedGameTurns() > 0))
 			{
-				SetAllUnitsUnprocessed();
-
-				bool bCommonPathFinderMPCaching = GC.getPathFinder().SetMPCacheSafe(true);
-				bool bIgnoreUnitsPathFinderMPCaching = GC.getIgnoreUnitsPathFinder().SetMPCacheSafe(true);
-				bool bTacticalPathFinderMPCaching = GC.GetTacticalAnalysisMapFinder().SetMPCacheSafe(true);
-				bool bInfluencePathFinderMPCaching = GC.getInfluenceFinder().SetMPCacheSafe(true);
-				bool bRoutePathFinderMPCaching = GC.getRouteFinder().SetMPCacheSafe(true);
-				bool bWaterRoutePathFinderMPCaching = GC.GetWaterRouteFinder().SetMPCacheSafe(true);
-
+				if(kGame.isNetworkMultiPlayer())
 				{
-					AI_PERF_FORMAT("AI-perf.csv", ("Connections/Gold, Turn %03d, %s", kGame.getElapsedGameTurns(), getCivilizationShortDescription()) );
-
-					// This block all has things which might change based on city connections changing
-					m_pCityConnections->Update();
-					GetTreasury()->DoUpdateCityConnectionGold();
-					DoUpdateHappiness();
+					DLLUI->AddMessage(0, GetID(), true, GC.getEVENT_MESSAGE_TIME(), GetLocalizedText("TXT_KEY_MISC_TURN_BEGINS").GetCString(), "AS2D_NEWTURN", MESSAGE_TYPE_DISPLAY_ONLY);
 				}
-
-				{
-					AI_PERF_FORMAT("AI-perf.csv", ("Builder Tasking, Turn %03d, %s", kGame.getElapsedGameTurns(), getCivilizationShortDescription()) );
-
-					m_pBuilderTaskingAI->Update();
-				}
-
-				if(kGame.isFinalInitialized())
-				{
-					if(isAlive())
-					{
-						if(GetDiplomacyRequests())
-						{
-							GetDiplomacyRequests()->BeginTurn();
-						}
-
-						doTurn();
-
-						doTurnUnits();
-					}
-				}
-
-				GC.getPathFinder().SetMPCacheSafe(bCommonPathFinderMPCaching);
-				GC.getIgnoreUnitsPathFinder().SetMPCacheSafe(bIgnoreUnitsPathFinderMPCaching);
-				GC.GetTacticalAnalysisMapFinder().SetMPCacheSafe(bTacticalPathFinderMPCaching);
-				GC.getInfluenceFinder().SetMPCacheSafe(bInfluencePathFinderMPCaching);
-				GC.getRouteFinder().SetMPCacheSafe(bRoutePathFinderMPCaching);
-				GC.GetWaterRouteFinder().SetMPCacheSafe(bWaterRoutePathFinderMPCaching);
-
-				if((GetID() == kGame.getActivePlayer()) && (kGame.getElapsedGameTurns() > 0))
-				{
-					if(kGame.isNetworkMultiPlayer())
-					{
-						DLLUI->AddMessage(0, GetID(), true, GC.getEVENT_MESSAGE_TIME(), GetLocalizedText("TXT_KEY_MISC_TURN_BEGINS").GetCString(), "AS2D_NEWTURN", MESSAGE_TYPE_DISPLAY_ONLY);
-					}
-				}
-
-				doWarnings();
 			}
+
+			doWarnings();
 
 #if defined(MOD_AI_MP_DIPLOMACY)
 			if (MOD_AI_MP_DIPLOMACY && isHuman())
@@ -17913,6 +17931,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			{
 				GetUnitCycler().Rebuild();
 
+				// PERSONAL TODO: Should jump to first unit with available movement?
+				// If none, then jump to nearest city? or do nothing? .-.
+				// Right now jumps ot selected unit even if it can't do anything.
 				if(DLLUI->GetLengthSelectionList() == 0)
 				{
 					DLLUI->setCycleSelectionCounter(1);
@@ -17922,10 +17943,12 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 				// slewis - added this so the tutorial knows when a turn begins
 				DLLUI->PublishActivePlayerTurnStart();
+				//CUSTOMLOG("PublishActivePlayerTurnStart");
 			}
 			else if(isHuman() && kGame.isGameMultiPlayer())
 			{
 				DLLUI->PublishRemotePlayerTurnStart();
+				//CUSTOMLOG("PublishRemotePlayerTurnStart");
 			}
 		}
 
@@ -17943,8 +17966,6 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			CvAssertFmt(GetEndTurnBlockingType() == NO_ENDTURN_BLOCKING_TYPE, "Expecting the end-turn blocking to be NO_ENDTURN_BLOCKING_TYPE, got %d", GetEndTurnBlockingType());
 			SetEndTurnBlocking(NO_ENDTURN_BLOCKING_TYPE, -1);	// Make sure this is clear so the UI doesn't block when it is not our turn.
-
-			DoUnitReset();
 
 			if(!isHuman())
 			{
@@ -17964,12 +17985,20 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 			if(GetID() == kGame.getActivePlayer())
 			{
 				DLLUI->PublishActivePlayerTurnEnd();
+				//CUSTOMLOG("PublishActivePlayerTurnEnd");
+			}
+			else if (isHuman() && kGame.isGameMultiPlayer()) 
+			{
+				// PERSONAL TODO: Is this necessary? Maybe called by DLL internally xd 
+				DLLUI->PublishRemotePlayerTurnEnd();
+				//CUSTOMLOG("PublishRemotePlayerTurnEnd");
 			}
 
-			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && gDLL->HasReceivedTurnAllComplete(GetID())) || kGame.getAIAutoPlay())
+			if(!isHuman() || (isHuman() && !isAlive()) || (isHuman() && (gDLL->HasReceivedTurnAllComplete(GetID()) || kGame.isWarPhase())) || kGame.getAIAutoPlay())
 				kGame.changeNumGameTurnActive(-1, std::string("setTurnActive() for player ") + getName());
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_END, GetID());
+			//CUSTOMLOG("PublishPlayerTurnStatus TURN_END");
 		}
 	}
 	else
@@ -18070,7 +18099,7 @@ void CvPlayer::setEndTurn(bool bNewValue)
 	){
 		//When doing simultaneous turns in multiplayer, we don't want anyone to end their turn until everyone has signalled TurnAllComplete.
 		// No setting end turn to true until all the players have sent the TurnComplete network message
-		if(!gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
+		if(!kGame.isWarPhase() && !gDLL->HasReceivedTurnAllCompleteFromAllPlayers())
 			return;
 	}
 
@@ -18104,7 +18133,7 @@ void CvPlayer::setEndTurn(bool bNewValue)
 		CvAssertMsg(isTurnActive(), "isTurnActive is expected to be true");
 
 		//fully simultaneous turns only run automoves after every human has moved.
-		if (!kGame.isOption(GAMEOPTION_DYNAMIC_TURNS) && GC.getGame().isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
+		if (!kGame.isOption(GAMEOPTION_DYNAMIC_TURNS) && GC.getGame().isOption(GAMEOPTION_SIMULTANEOUS_TURNS) && !kGame.isWarPhase())
 			checkRunAutoMovesForEveryone();
 		else
 			setAutoMoves(true);
@@ -27883,7 +27912,7 @@ void CvPlayer::doArmySize()
 //	--------------------------------------------------------------------------------
 void CvPlayer::checkInitialTurnAIProcessed()
 {
-	int turn = GC.getGame().getGameTurn();
+	int turn = GC.getGame().getFakeGameTurn();
 	if(m_lastGameTurnInitialAIProcessed != turn)
 	{
 		//Note: Players that are not turn active at the beginning of the game turn will 
@@ -28046,6 +28075,7 @@ bool CancelActivePlayerEndTurn()
 		if (gDLL->sendTurnUnready())	// This will see if we can actually do the unready, sometimes you can't in MP games.
 		{
 			kActivePlayer.setEndTurn(false);
+			CUSTOMLOG("Canceled PlayerEndTurn and sent unready!");
 			return true;
 		}
 		return false;
