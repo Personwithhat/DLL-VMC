@@ -2037,7 +2037,11 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 				//Time since the game (year) turn started.  Used for measuring time for players in simultaneous turn mode.
 				float timeSinceGameTurnStart = m_timeSinceGameTurnStart.Peek() + m_fCurrentTurnTimerPauseDelta; 
 				
+#ifndef MOD_WAR_PHASE
 				float timeElapsed = (curPlayer.isSimultaneousTurns() ? timeSinceGameTurnStart : timeSinceCurrentTurnStart);
+#else
+				float timeElapsed = (curPlayer.isSimultaneousTurns() && !isWarPhase() ? timeSinceGameTurnStart : timeSinceCurrentTurnStart);
+#endif
 				if(curPlayer.isTurnActive())
 				{//The timer is ticking for our turn
 					if(timeElapsed > gameTurnEnd)
@@ -2053,6 +2057,7 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 					}
 				}
 
+#ifndef MOD_WAR_PHASE
 				if((!curPlayer.isTurnActive() || gDLL->HasReceivedTurnComplete(playerID)) //Active player has finished their turn.
 					&& getNumSequentialHumans() > 1)	//and sequential turn mode
 				{//It's not our turn and there are sequential turn human players in the game.
@@ -2085,7 +2090,34 @@ bool CvGame::hasTurnTimerExpired(PlayerTypes playerID)
 						timeElapsed = timeSinceGameTurnStart + (humanTurnsCompleted-1)*timePerPlayer;
 					}
 				}
+#else
+				if ((!curPlayer.isTurnActive() || gDLL->HasReceivedTurnComplete(playerID)) //Active player has finished their turn.
+					&& isWarPhase())	//and in War Phase
+				{//It's not our turn, still waiting on other players.
 
+					//In this case, the turn timer shows progress in terms of the max possible time until the Sim Phase.
+					//As such, timeElapsed has to be adjusted to be a value in terms of the max possible time.
+					gameTurnEnd = 0;
+					for (int curPlayerIdx = 0; curPlayerIdx < MAX_CIV_PLAYERS; ++curPlayerIdx)
+					{
+						CvPlayer& kCurrentPlayer = GET_PLAYER((PlayerTypes)curPlayerIdx);
+						if (kCurrentPlayer.isHuman()
+							&& kCurrentPlayer.isAlive()
+							&& !gDLL->HasReceivedTurnComplete((PlayerTypes)curPlayerIdx)
+							&& !kCurrentPlayer.isLocalPlayer()) // Don't count ourselves.
+						{
+							gameTurnEnd += kCurrentPlayer.getCachedTurnTimer();
+						}
+					}
+
+					// Waiting on turn-processing, just set to zero.
+					if (gameTurnEnd == 0) {
+						CvPreGame::setEndTurnTimerLength(0.0f);
+						iface->updateEndTurnTimer(0.0f);
+						return gameTurnTimerExpired;
+					}
+				}
+#endif
 				if(isLocalPlayer)
 				{//update the local end turn timer.
 					CvPreGame::setEndTurnTimerLength(gameTurnEnd);
@@ -4823,12 +4855,13 @@ void CvGame::resetTurnTimer(bool resetGameTurnStart)
 		CvPlayer& kCurrentPlayer = GET_PLAYER((PlayerTypes)curPlayerIdx);
 		if (kCurrentPlayer.isHuman() && kCurrentPlayer.isAlive())
 		{
-			kCurrentPlayer.cacheTurnTimer(getMaxTurnLen());
+			kCurrentPlayer.cacheTurnTimer(getMaxTurnLen((PlayerTypes)curPlayerIdx));
 		}
 	}
 }
 
 //	--------------------------------------------------------------------------------
+#ifndef MOD_WAR_PHASE
 int CvGame::getMaxTurnLen()
 {//returns the amount of time players are being given for this turn.
 	if(getPitbossTurnTime() != 0)
@@ -4874,6 +4907,62 @@ int CvGame::getMaxTurnLen()
 		return baseTurnTime;
 	}
 }
+#else
+int CvGame::getMaxTurnLen(PlayerTypes playerID)
+{//returns the amount of time players are being given for this turn.
+	int iMaxUnits = 0;
+	int iMaxCities = 0;
+	int baseTurnTime = 0;
+
+	// Default to local player
+	if (playerID == NO_PLAYER)
+		playerID = getActivePlayer();
+
+	CvUnit* pLoopUnit; int iLoop;
+	if (!isWarPhase()) {
+		// Simultaneous turn-timer.
+		// Calculate the max turn time based on the max number of units and cities owned by HUMAN player.
+		for (int i = 0; i < MAX_CIV_PLAYERS; ++i)
+		{
+			CvPlayer& cPlayer = GET_PLAYER((PlayerTypes)i);
+			if (cPlayer.isAlive() && cPlayer.isHuman())
+			{
+				// Only consider non-war units for simulation-phase turn timer.
+				int nonWarCount = 0;
+				for (pLoopUnit = cPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = cPlayer.nextUnit(&iLoop))
+					if (!pLoopUnit->getUnitInfo().IsWarPhaseOnly())
+						nonWarCount++;
+
+				if (nonWarCount > iMaxUnits)
+					iMaxUnits = nonWarCount;
+
+				if (cPlayer.getNumCities() > iMaxCities)
+					iMaxCities = cPlayer.getNumCities();
+			}
+		}
+
+		// Usual dynamic turn-timer, based on units and cities.
+		const CvTurnTimerInfo& kTurnTimer = CvPreGame::turnTimerInfo();
+		baseTurnTime = (kTurnTimer.getBaseTime() +
+			(kTurnTimer.getCityResource() * iMaxCities) +
+			(kTurnTimer.getUnitResource() * iMaxUnits));
+
+	} else {
+		// Any war-phase unit for current player adds 2 seconds to timer.
+		CvPlayer& cPlayer = GET_PLAYER(playerID);
+		CvUnit* pLoopUnit; int iLoop;
+		for (pLoopUnit = cPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = cPlayer.nextUnit(&iLoop))
+			if (pLoopUnit->getUnitInfo().IsWarPhaseOnly())
+				baseTurnTime += 2;
+
+		// Minimum of 5 second timer.
+		if (baseTurnTime < 5)
+			baseTurnTime = 5;
+	}
+
+	return baseTurnTime;
+}
+#endif
 
 //	--------------------------------------------------------------------------------
 bool CvGame::IsStaticTutorialActive() const

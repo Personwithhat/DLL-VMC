@@ -190,7 +190,11 @@ public:
 	void changeTurnSlice(int iChange);
 
 	void resetTurnTimer(bool resetGameTurnStart = true);
+#ifdef MOD_WAR_PHASE
+	int getMaxTurnLen(PlayerTypes playerId = NO_PLAYER);
+#else
 	int getMaxTurnLen();
+#endif
 
 	bool IsStaticTutorialActive() const;
 	void SetStaticTutorialActive(bool bStaticTutorialActive);
