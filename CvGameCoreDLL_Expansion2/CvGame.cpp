@@ -2707,6 +2707,15 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 	{
 		if(pkSelectedUnit->getOwner() == getActivePlayer() && !pSelectedUnit->IsBusy())
 		{
+#ifdef MOD_WAR_PHASE_BLOCK
+			// Allow promotion of Military units during simulation phase.
+			bool acceptable = (eMessage == GAMEMESSAGE_DO_COMMAND && (CommandTypes)iData2 == COMMAND_PROMOTION);
+			if (!acceptable && m_bWarPhase != pkSelectedUnit->getUnitInfo().IsWarPhaseOnly()) {
+				CUSTOMLOG("ERROR: Tried to control unit in wrong phase!");
+				return;
+			}
+#endif
+
 			if(eMessage == GAMEMESSAGE_DO_COMMAND)
 			{
 				gDLL->sendDoCommand(pkSelectedUnit->GetID(), ((CommandTypes)iData2), iData3, iData4, bAlt);
@@ -2751,6 +2760,17 @@ void CvGame::selectedCitiesGameNetMessage(int eMessage, int iData2, int iData3, 
 	CvCity* pSelectedCity;
 
 	pSelectedCityNode = GC.GetEngineUserInterface()->headSelectedCitiesNode();
+
+	// PERSONAL TODO: Lua for CityView sometimes calls directly, e.g. Network.SendDoTask() or Network.SendUpdateCityCitizens()
+	// It bypasses C++ here (for no apparent reason??)
+	// Need to improve all this anyway. Should simply not show the UI buttons, instead of 'silently' blocking action.
+#ifdef MOD_WAR_PHASE_BLOCK
+	// Task handled further down, since lua may bypass this/etc. >.>
+	if (isWarPhase() && eMessage != GAMEMESSAGE_DO_TASK) {
+		CUSTOMLOG("ERROR: Tried to do something with city during war. Nope :)");
+		return;
+	}
+#endif
 
 	while(pSelectedCityNode != NULL)
 	{
@@ -3060,6 +3080,14 @@ bool CvGame::canHandleAction(int iAction, CvPlot* pPlot, bool bTestVisible)
 	CvActionInfo* pActionInfo = GC.getActionInfo(iAction);
 	CvAssert(pActionInfo != NULL);
 	if(!pActionInfo) return false;
+
+#ifdef MOD_WAR_PHASE_BLOCK
+	// PERSONAL TODO: Move other stuff here, as well!! (Similar to check below for isSimultaneousTurns, should work safely!)
+	// This is to hide the promotion pop-up on unit during war phase.
+	// UnitPanel.lua is affected by this.
+	if (isWarPhase() && pActionInfo->getSubType() == ACTIONSUBTYPE_PROMOTION)
+		return false;
+#endif 
 
 	if(pActionInfo->getControlType() != NO_CONTROL)
 	{
