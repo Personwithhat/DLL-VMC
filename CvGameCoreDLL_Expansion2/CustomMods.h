@@ -1074,6 +1074,7 @@ enum BattleTypeTypes
 #define GAMEEVENT_UnitUpgraded					"UnitUpgraded",					"iiib"
 #define GAMEEVENT_EnableInput					"EnableInput",					""
 #define GAMEEVENT_DisableInput					"DisableInput",					""
+#define GAMEEVENT_RefreshUI						"RefreshUI",					""
 
 // Serialization wrappers
 #define MOD_SERIALIZE

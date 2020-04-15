@@ -1671,8 +1671,15 @@ void CvGame::CheckPlayerTurnDeactivate()
 
 			// But only 'activate' the first player initially.
 			// CASE: Turn 0 player already active.
-			if (pFirst)
+			if (pFirst) {
 				pFirst->setTurnActive(true, false);
+
+				// Update local-player UI even if it's not their turn.
+				// Just so they can see new values while waiting
+				// Will refresh again when their turn starts.
+				if (pFirst->GetID() != getActivePlayer())
+					GAMEEVENTINVOKE_HOOK(GAMEEVENT_RefreshUI);
+			}
 		}
 	}
 
