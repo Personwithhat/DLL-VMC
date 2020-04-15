@@ -219,4 +219,10 @@
     <!-- See also: "Global - City Jungle Bonus" -->
     <!-- Row Name="GLOBAL_CITY_JUNGLE_BONUS_TECH" Table="Technologies" Type="TECH_BRONZE_WORKING"/ --> <!-- Required tech -->
   </CustomModPostDefines>
+  
+  <Language_en_US>
+    <Row Tag="TXT_KEY_INPUT_NOTICE">
+      <Text>Input disabled, please wait.</Text>
+    </Row>
+  </Language_en_US>
 </GameData>

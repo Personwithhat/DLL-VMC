@@ -17,6 +17,7 @@ local CHAT_COMPENSATION = 170;
 local MINIMAP_GUESS = 250;
 local _, screenY = UIManager:GetScreenSizeVal();
 Controls.MPListScroll:SetSizeY( screenY - MINIMAP_GUESS - TOP_COMPENSATION - CHAT_COMPENSATION );
+Controls.MPListScroll:SetOffsetY( TOP_COMPENSATION + CHAT_COMPENSATION );
 
 local SEPARATOR_MARGIN = 10;
 

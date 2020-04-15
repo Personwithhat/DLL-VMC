@@ -277,4 +277,6 @@
   <LuaContext FileName="Assets/UI/Options/OptionsMenu" ID="OptionsMenu_InGame" Hidden="1" />
   <LuaContext FileName="Assets/UI/FrontEnd/TouchControlsMenu" ID="TouchControlsMenu" DeferLoad="1" Hidden="1" />
 
+  <LuaContext FileName="Assets/UI/InGame/WorldView/MPList" ID="MPList" Hidden="1" />
+  
 </Context>

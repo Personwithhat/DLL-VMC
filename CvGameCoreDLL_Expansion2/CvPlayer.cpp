@@ -18109,9 +18109,16 @@ void CvPlayer::setEndTurn(bool bNewValue)
 		else
 			setAutoMoves(true);
 
+		if (GetID() == kGame.getActivePlayer()) {
+			CUSTOMLOG("INPUT: Disabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
+		}
 	} else {
 		setAutoMoves(false);
-
+		if (GetID() == kGame.getActivePlayer()) {
+			CUSTOMLOG("INPUT: Enabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
+		}
 	}
 
 }
@@ -27687,6 +27694,12 @@ void CvPlayer::disconnected()
 					Localization::String kickedMsg = Localization::Lookup("TXT_KEY_PLAYER_KICKED");
 					kickedMsg << getNameKey();
 					pNotifications->Add(NOTIFICATION_PLAYER_KICKED, kickedMsg.toUTF8(), kickedMsg.toUTF8(), -1, -1, GetID());
+
+					// If you kick an 'Taken' slot -> They left, then you kicked slot. Should re-enable input!
+					if (CvPreGame::isPitBoss() && !GET_PLAYER(GetID()).isConnected()) {
+						CUSTOMLOG("An empty player slot was kicked: Enabling Input");
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
+					}
 				}
 				else{
 					Localization::String disconnectString = Localization::Lookup("TXT_KEY_PLAYER_DISCONNECTED");
@@ -27698,6 +27711,12 @@ void CvPlayer::disconnected()
 					}
 
 					pNotifications->Add(NOTIFICATION_PLAYER_DISCONNECTED, disconnectString.toUTF8(), disconnectString.toUTF8(), -1, -1, GetID());
+
+					// Only applies to regular DC. Kicks are not affected.
+					if (!isObserver()) {
+						CUSTOMLOG("A player has disconnected: Disabling Input");
+						GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
+					}
 				}
 			}
 
@@ -27724,9 +27743,9 @@ void CvPlayer::disconnected()
 void CvPlayer::reconnected()
 {
 	//Preserve observer status for the connecting human player's slot.
-	if(CvPreGame::slotStatus(GetID()) != SS_OBSERVER){
+	SlotStatus origStatus = CvPreGame::slotStatus(GetID());
+	if(origStatus != SS_OBSERVER)
 		CvPreGame::setSlotStatus(GetID(), SS_TAKEN);
-	}
 
 	CvPreGame::VerifyHandicap(GetID()); //verify the handicap because we might have replaced an ai.
 
@@ -27744,6 +27763,12 @@ void CvPlayer::reconnected()
 		if(pNotifications)
 		{
 			pNotifications->Add(NOTIFICATION_PLAYER_CONNECTING, connectString.toUTF8(), connectString.toUTF8(), -1, -1, GetID());
+		}
+
+		// If player reconnecting after DC'ing (not after kick, so slot is still 'taken')
+		if (CvPreGame::isPitBoss() && origStatus == SS_TAKEN) {
+			CUSTOMLOG("A player is reconnecting: Enabling Input");
+			GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
 		}
 	}
 }

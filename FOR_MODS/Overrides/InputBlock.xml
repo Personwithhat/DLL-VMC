@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Context ColorSet="Beige_Black" Font="TwCenMT22" FontStyle="Shadow" >
+    <Label ID="InputNotice" Anchor ="C,T" Font="TwCenMT24" ColorSet="Beige_Black_Alpha" FontStyle="Stroke" String="TXT_KEY_INPUT_NOTICE" />
+	
+	<LuaContext FileName="Assets/UI/InGame/Menus/GameMenu" ID="GameMenu" Hidden="True"/>
+	<LuaContext FileName="Assets/UI/InGame/WorldView/MPList" ID="MPList" Hidden="1" />
+</Context>

@@ -1267,3 +1267,57 @@ for addin in Modding.GetActivatedModEntryPoints("InGameUIAddin") do
 	
 	table.insert(g_uiAddins, ContextPtr:LoadNewContext(path));
 end
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+-- Allows DLL to enable/disable input.....
+-- TL;DR -> Has to be popup
+-- Impossible to control in DLL
+-- Lua code is by-context and has individual button callbacks/etc, can't override all of them.
+-------------------------------------------------------------------------------
+local bBlockInput = 0;
+function OnDisableInput()
+	bBlockInput = bBlockInput + 1;
+	print("DisabledInput. Current: " .. tostring(bBlockInput));
+
+	-- Clear highlights/etc.
+	ClearAllHighlights();
+	Events.DisplayMovementIndicator( false );
+	
+	-- Maybe this as well?
+	--Events.SerialEventCameraStopMovingRight();
+	--Events.SerialEventCameraStopMovingLeft();
+	--Events.SerialEventCameraStopMovingBack();
+	--Events.SerialEventCameraStopMovingForward();
+	
+	-- Only do it once per disable.
+	if(bBlockInput == 1) then
+		UIManager:QueuePopup( Controls.InputBlock, PopupPriority.InGameMenu );
+	end
+end
+GameEvents.DisableInput.Add( OnDisableInput );
+
+function OnEnableInput()
+	bBlockInput = bBlockInput - 1;
+	if(bBlockInput < 0) then
+		bBlockInput = 0;
+	end
+	print("EnabledInput. Current: " .. tostring(bBlockInput));
+
+	-- Again, only once per enable.
+	if(bBlockInput == 0) then
+		UIManager:DequeuePopup( Controls.InputBlock );
+	end
+end
+GameEvents.EnableInput.Add( OnEnableInput );
+
+--------------------------------------------------------------------------------
+-- Hack to force a call to refresh UI. No way of calling from DLL/etc.
+-- Otherwise, when sequential, UI won't update until you are set as active player (for some obscure reason)
+-------------------------------------------------------------------------------
+function OnRefreshUI()
+	print("Calling EventCityInfoDirty to refresh UI");
+	Events.SerialEventCityInfoDirty.CallImmediate();
+end
+GameEvents.RefreshUI.Add( OnRefreshUI );

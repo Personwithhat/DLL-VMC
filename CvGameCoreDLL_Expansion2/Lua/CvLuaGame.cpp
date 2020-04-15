@@ -3392,6 +3392,11 @@ int CvLuaGame::lGameDoneLoading(lua_State* L)
 			CUSTOMLOG("ERROR: Failed for hack to unready players. Expected when resyncing only!!!")
 	//~ workaround
 
+	// Disable input on load, wait for player activation. Unless observer.
+	if (!kPlayer.isTurnActive() && !(CvPreGame::slotStatus(kPlayer.GetID()) == SS_OBSERVER)) {
+		CUSTOMLOG("INPUT: Disabling Input - Initial load. Not active yet.");
+		GAMEEVENTINVOKE_HOOK(GAMEEVENT_DisableInput);
+	}
 	return 1;
 }
 

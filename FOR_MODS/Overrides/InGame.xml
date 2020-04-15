@@ -72,6 +72,7 @@
 		<LuaContext FileName="Assets/UI/InGame/TopPanel" ID="TopPanel"/>
 		<Stack Anchor="C,T" Size="Full,Full" StackGrowth="B" Padding="16" ID="AlertStack" Offset="0,129"/>
 		<LuaContext FileName="Assets/UI/InGame/Menus/GameMenu" ID="GameMenu" Hidden="True"/>
+		<LuaContext FileName="Assets/UI/InGame/Menus/InputBlock" ID="InputBlock" Hidden="True"/>
 		<LuaContext FileName="Assets/UI/InGame/PlayerChange" ID="PlayerChange" Hidden="True"/>
 		<LuaContext FileName="Assets/UI/FrontEnd/ContentSwitch" ID="ContentSwitch" Hidden="1" />
 		<Container ID="ScreenEdgeScrolling" Size="F,F">
