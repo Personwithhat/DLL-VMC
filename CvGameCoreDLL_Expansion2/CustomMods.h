@@ -129,7 +129,7 @@
 // Permit cities to work tiles up to MAXIMUM_ACQUIRE_PLOT_DISTANCE - WARNING! Cities take 2.5 times as much memory/file space
 //#define MOD_GLOBAL_CITY_WORKING                     gCustomMods.isGLOBAL_CITY_WORKING()
 // Permit cities to have automaton workers (v89)
-#define MOD_GLOBAL_CITY_AUTOMATON_WORKERS           gCustomMods.isGLOBAL_CITY_AUTOMATON_WORKERS()
+//#define MOD_GLOBAL_CITY_AUTOMATON_WORKERS           gCustomMods.isGLOBAL_CITY_AUTOMATON_WORKERS()
 // Enables rebasing to and airlifting to/from improvements (v74)
 #define MOD_GLOBAL_RELOCATION                       gCustomMods.isGLOBAL_RELOCATION()
 // Mountain plots return their terrain as TERRAIN_MOUNTAIN and any land unit may enter a mountain that has a road/rail route
@@ -223,7 +223,7 @@
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 //#define MOD_TRAITS_CITY_WORKING                     gCustomMods.isTRAITS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
-#define MOD_TRAITS_CITY_AUTOMATON_WORKERS           gCustomMods.isTRAITS_CITY_AUTOMATON_WORKERS()
+//#define MOD_TRAITS_CITY_AUTOMATON_WORKERS           gCustomMods.isTRAITS_CITY_AUTOMATON_WORKERS()
 // Enables traits to be enabled/obsoleted via beliefs and policies (v77)
 #define MOD_TRAITS_OTHER_PREREQS                    gCustomMods.isTRAITS_OTHER_PREREQS()
 // Enables any belief to be selected, even if already taken (v46)
@@ -236,12 +236,12 @@
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 //#define MOD_POLICIES_CITY_WORKING                   gCustomMods.isPOLICIES_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
-#define MOD_POLICIES_CITY_AUTOMATON_WORKERS         gCustomMods.isPOLICIES_CITY_AUTOMATON_WORKERS()
+//#define MOD_POLICIES_CITY_AUTOMATON_WORKERS         gCustomMods.isPOLICIES_CITY_AUTOMATON_WORKERS()
 
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 //#define MOD_TECHS_CITY_WORKING                      gCustomMods.isTECHS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v89)
-#define MOD_TECHS_CITY_AUTOMATON_WORKERS            gCustomMods.isTECHS_CITY_AUTOMATON_WORKERS()
+//#define MOD_TECHS_CITY_AUTOMATON_WORKERS            gCustomMods.isTECHS_CITY_AUTOMATON_WORKERS()
 
 // Permits variable great general and admiral aura ranges (v83)
 #define MOD_PROMOTIONS_AURA_CHANGE                  gCustomMods.isPROMOTIONS_AURA_CHANGE()
@@ -278,7 +278,7 @@
 // Permits cities to work more rings - AFFECTS SAVE GAME DATA FORMAT
 //#define MOD_BUILDINGS_CITY_WORKING                  gCustomMods.isBUILDINGS_CITY_WORKING()
 // Permit cities to have automaton workers - AFFECTS SAVE GAME DATA FORMAT (v90)
-#define MOD_BUILDINGS_CITY_AUTOMATON_WORKERS        gCustomMods.isBUILDINGS_CITY_AUTOMATON_WORKERS()
+//#define MOD_BUILDINGS_CITY_AUTOMATON_WORKERS        gCustomMods.isBUILDINGS_CITY_AUTOMATON_WORKERS()
 
 // Scales trade routes based on map size and game speed (v52)
 #define MOD_TRADE_ROUTE_SCALING                     gCustomMods.isTRADE_ROUTE_SCALING()
