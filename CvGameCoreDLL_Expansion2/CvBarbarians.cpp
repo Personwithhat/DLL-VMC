@@ -399,7 +399,10 @@ void CvBarbarians::DoCamps()
 					{
 #if defined(MOD_BUGFIX_BARB_CAMP_TERRAINS)
 						CvImprovementEntry* pkImprovementInfo = GC.getImprovementInfo(eCamp);
-						if(MOD_BUGFIX_BARB_CAMP_TERRAINS == false || pkImprovementInfo == NULL || (pkImprovementInfo->GetTerrainMakesValid(pLoopPlot->getTerrainType()) && pkImprovementInfo->GetFeatureMakesValid(pLoopPlot->getFeatureType()))) {
+						bool hasReqImprovement = pkImprovementInfo->GetTerrainMakesValid(pLoopPlot->getTerrainType()); // Terrain can't be NO_TERRAIN here.
+						bool hasReqFeature = (pLoopPlot->getFeatureType() != NO_FEATURE) && pkImprovementInfo->GetFeatureMakesValid(pLoopPlot->getFeatureType());
+
+						if(MOD_BUGFIX_BARB_CAMP_TERRAINS == false || pkImprovementInfo == NULL || (hasReqImprovement && hasReqFeature)) {
 #endif
 						if(!pLoopPlot->isOwned() && !pLoopPlot->isVisibleToCivTeam())
 						{
