@@ -1535,9 +1535,9 @@ void CvGame::update()
 							//CvPreGame::setGameTurn(iNewValue);
 							//CvAssert(getGameTurn() >= 0);
 
-							//setScoreDirty(true);
-							//GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
-							//GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
+							setScoreDirty(true);
+							GC.GetEngineUserInterface()->setDirty(TurnTimer_DIRTY_BIT, true);
+							GC.GetEngineUserInterface()->setDirty(GameData_DIRTY_BIT, true);
 
 							m_sentAutoMoves = false;
 							gDLL->GameplayTurnChanged(getGameTurn());
@@ -1781,7 +1781,7 @@ void CvGame::CheckPlayerTurnDeactivate()
 														resetTurnTimer(false);
 													}
 													else
-														CUSTOMLOG("ERROR: Should not be hitting this!");
+														CUSTOMLOG("Should not be hitting this! From [%s] to [%s]", kPlayer.getCivilizationShortDescription(), kNextPlayer.getCivilizationShortDescription());
 												}
 												break;
 											}
@@ -5875,7 +5875,6 @@ void CvGame::setFinalInitialized(bool bNewValue)
 		m_bFinalInitialized = bNewValue;
 	}
 }
-
 
 //	--------------------------------------------------------------------------------
 bool CvGame::getPbemTurnSent() const
@@ -10661,9 +10660,7 @@ int CvGame::GetAction(int iKeyStroke, bool bAlt, bool bShift, bool bCtrl)
 	int iActionIndex = -1;
 	int iPriority = -1;
 
-	// PERSONAL TODO !!!: Much better input control here?
-	// Is this where I can actually override and ignore input in the DLL?
-	// How did I miss this xd
+
 	for(i=0; i<GC.getNumActionInfos(); i++)
 	{
 		CvActionInfo& thisActionInfo = *GC.getActionInfo(i);
