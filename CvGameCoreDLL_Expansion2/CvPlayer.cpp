@@ -17806,6 +17806,8 @@ void CvPlayer::setTurnActiveForPbem(bool bActive)
 }
 //	--------------------------------------------------------------------------------
 void CvPlayer::calcTurn() {
+	DoUnitAttrition();
+
 	CvGame& kGame = GC.getGame();
 	if (kGame.getActivePlayer() == m_eID)
 	{
@@ -17813,7 +17815,6 @@ void CvPlayer::calcTurn() {
 		theMap.updateDeferredFog();
 	}
 
-	DoUnitAttrition();
 	SetAllUnitsUnprocessed();
 
 	bool bCommonPathFinderMPCaching = GC.getPathFinder().SetMPCacheSafe(true);
@@ -17905,6 +17906,9 @@ void CvPlayer::setTurnActive(bool bNewValue, bool bDoTurn)
 
 			DLLUI->PublishPlayerTurnStatus(DLLUIClass::TURN_START, GetID());
 			//CUSTOMLOG("PublishPlayerTurnStatus START");
+
+			if (!bDoTurn && !isHuman())
+				CUSTOMLOG("ERROR: Should not be hitting this! 2")
 
 			if(bDoTurn)
 				calcTurn();
