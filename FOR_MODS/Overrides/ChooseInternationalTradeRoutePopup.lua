@@ -364,11 +364,12 @@ function SelectTradeDestinationChoice(iPlotX, iPlotY, iTradeConnectionType)
 	g_selectedPlotY = iPlotY;
 	g_selectedTradeType = iTradeConnectionType;
 	
-	Controls.ChooseConfirm:SetHide(false);
+	--Controls.ChooseConfirm:SetHide(false);
+	OnConfirmYes();
 end
 
 function OnConfirmYes( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 	
 	local kPlot = Map.GetPlot( g_selectedPlotX, g_selectedPlotY );	
 	Game.SelectionListGameNetMessage(GameMessageTypes.GAMEMESSAGE_PUSH_MISSION, MissionTypes.MISSION_ESTABLISH_TRADE_ROUTE, kPlot:GetPlotIndex(), g_selectedTradeType, 0, false, nil);
@@ -380,7 +381,7 @@ end
 Controls.ConfirmYes:RegisterCallback( Mouse.eLClick, OnConfirmYes );
 
 function OnConfirmNo( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 end
 Controls.ConfirmNo:RegisterCallback( Mouse.eLClick, OnConfirmNo );
 

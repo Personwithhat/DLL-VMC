@@ -167,8 +167,9 @@ function PolicySelected( policyIndex )
 	if bCanAdoptPolicy and not bPolicyBlocked then
 		m_gPolicyID = policyIndex;
 		m_gAdoptingPolicy = true;
-		Controls.PolicyConfirm:SetHide(false);
-		Controls.BGBlock:SetHide(true);
+		--Controls.PolicyConfirm:SetHide(false);
+		--Controls.BGBlock:SetHide(true);
+		OnYes();
 	end
 
 end
@@ -217,8 +218,9 @@ function PolicyBranchSelected( policyBranchIndex )
 	if bCanAdoptPolicyBranch and not bUnblockingPolicyBranch then
 		m_gPolicyID = policyBranchIndex;
 		m_gAdoptingPolicy = false;
-		Controls.PolicyConfirm:SetHide(false);
-		Controls.BGBlock:SetHide(true);
+		--Controls.PolicyConfirm:SetHide(false);
+		--Controls.BGBlock:SetHide(true);
+		OnYes();
 	end
 end
 
@@ -995,8 +997,8 @@ function Init()
 end
 
 function OnYes( )
-	Controls.PolicyConfirm:SetHide(true);
-	Controls.BGBlock:SetHide(false);
+	--Controls.PolicyConfirm:SetHide(true);
+	--Controls.BGBlock:SetHide(false);
 
 	Network.SendUpdatePolicies(m_gPolicyID, m_gAdoptingPolicy, true);
 	Events.AudioPlay2DSound("AS2D_INTERFACE_POLICY");
@@ -1005,8 +1007,8 @@ end
 Controls.Yes:RegisterCallback( Mouse.eLClick, OnYes );
 
 function OnNo( )
-	Controls.PolicyConfirm:SetHide(true);
-	Controls.BGBlock:SetHide(false);
+	--Controls.PolicyConfirm:SetHide(true);
+	--Controls.BGBlock:SetHide(false);
 end
 Controls.No:RegisterCallback( Mouse.eLClick, OnNo );
 
@@ -1056,13 +1058,15 @@ if bnw_mode then
 	function ChooseTenet(tenet, name)
 		g_SelectedTenet = tenet;
 		Controls.LabelConfirmTenet:LocalizeAndSetText("TXT_KEY_POLICYSCREEN_CONFIRM_TENET", name);
-		Controls.TenetConfirm:SetHide(false);
+		--Controls.TenetConfirm:SetHide(false);
+		
+		-- Assume true
+		OnTenetConfirmYes();
 	end
-
 
 	function OnTenetConfirmYes( )
 
-		Controls.TenetConfirm:SetHide(true);
+		--Controls.TenetConfirm:SetHide(true);
 		Controls.ChooseTenet:SetHide(true);
 		Controls.BGBlock:SetHide(false);
 
@@ -1072,8 +1076,7 @@ if bnw_mode then
 	Controls.TenetConfirmYes:RegisterCallback( Mouse.eLClick, OnTenetConfirmYes );
 
 	function OnTenetConfirmNo( )
-		Controls.TenetConfirm:SetHide(true);
-		Controls.BGBlock:SetHide(false);
+		--Controls.TenetConfirm:SetHide(true);
 	end
 	Controls.TenetConfirmNo:RegisterCallback( Mouse.eLClick, OnTenetConfirmNo );
 

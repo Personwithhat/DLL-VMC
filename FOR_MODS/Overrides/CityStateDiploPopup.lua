@@ -1087,8 +1087,11 @@ function BullyAction( action )
 	end
 
 	Controls.BullyConfirmLabel:SetText( bullyConfirmString )
-	Controls.BullyConfirm:SetHide(false)
-	Controls.BGBlock:SetHide(true)
+	--Controls.BullyConfirm:SetHide(false)
+	--Controls.BGBlock:SetHide(true)
+	
+	-- Assume "Yes"
+	OnYesBully()
 end
 
 
@@ -1153,15 +1156,15 @@ function OnYesBully( )
 	m_lastAction = m_pendingAction
 	m_pendingAction = kiNoAction
 
-	Controls.BullyConfirm:SetHide(true)
-	Controls.BGBlock:SetHide(false)
+	--Controls.BullyConfirm:SetHide(true)
+	--Controls.BGBlock:SetHide(false)
 end
 Controls.YesBully:RegisterCallback( Mouse.eLClick, OnYesBully )
 
 function OnNoBully( )
 	m_lastAction = kiNoAction
 	m_pendingAction = kiNoAction
-	Controls.BullyConfirm:SetHide(true)
-	Controls.BGBlock:SetHide(false)
+	--Controls.BullyConfirm:SetHide(true)
+	--Controls.BGBlock:SetHide(false)
 end
 Controls.NoBully:RegisterCallback( Mouse.eLClick, OnNoBully )

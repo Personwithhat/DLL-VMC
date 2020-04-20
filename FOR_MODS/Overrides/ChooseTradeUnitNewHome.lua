@@ -158,11 +158,12 @@ function SelectNewHome(iPlotX, iPlotY)
 	g_selectedPlotX = iPlotX;
 	g_selectedPlotY = iPlotY;
 	
-	Controls.ChooseConfirm:SetHide(false);
+	--Controls.ChooseConfirm:SetHide(false);
+	OnConfirmYes();
 end
 
 function OnConfirmYes( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 	
 	Game.SelectionListGameNetMessage(GameMessageTypes.GAMEMESSAGE_PUSH_MISSION, MissionTypes.MISSION_CHANGE_TRADE_UNIT_HOME_CITY, g_selectedPlotX, g_selectedPlotY, 0, false, bShift);
 		
@@ -173,7 +174,7 @@ end
 Controls.ConfirmYes:RegisterCallback( Mouse.eLClick, OnConfirmYes );
 
 function OnConfirmNo( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 end
 Controls.ConfirmNo:RegisterCallback( Mouse.eLClick, OnConfirmNo );
 

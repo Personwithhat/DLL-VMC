@@ -154,11 +154,14 @@ function SelectPantheon(beliefID)
 	g_BeliefID = beliefID;
 	local belief = GameInfo.Beliefs[beliefID];
 	Controls.ConfirmText:LocalizeAndSetText("TXT_KEY_CONFIRM_PANTHEON", belief.ShortDescription);
-	Controls.ChooseConfirm:SetHide(false);
+	--Controls.ChooseConfirm:SetHide(false);
+	
+	-- Assume True
+	OnYes();
 end
 
 function OnYes( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 	
 	Network.SendFoundPantheon(Game.GetActivePlayer(), g_BeliefID);
 	Events.AudioPlay2DSound("AS2D_INTERFACE_POLICY");	
@@ -168,7 +171,7 @@ end
 Controls.Yes:RegisterCallback( Mouse.eLClick, OnYes );
 
 function OnNo( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 end
 Controls.No:RegisterCallback( Mouse.eLClick, OnNo );
 

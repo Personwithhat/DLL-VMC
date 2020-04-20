@@ -585,7 +585,7 @@ function OnYes( )
 
 	local pPlayer = Players[Game.GetActivePlayer()];
 	
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 	
 	local religion = GameInfo.Religions[g_CurrentReligionID];
 	
@@ -628,7 +628,7 @@ end
 Controls.Yes:RegisterCallback( Mouse.eLClick, OnYes );
 
 function OnNo( )
-	Controls.ChooseConfirm:SetHide(true);
+	--Controls.ChooseConfirm:SetHide(true);
 end
 Controls.No:RegisterCallback( Mouse.eLClick, OnNo );
 
@@ -670,7 +670,10 @@ function FoundReligion()
 		t = Locale.Lookup("TXT_KEY_CHOOSE_RELIGION_CONFIRM_ENHANCE", g_CurrentReligionName);
 	end
 	Controls.LabelConfirmFoundReligion:SetText(t);
-	Controls.ChooseConfirm:SetHide(false);
+	--Controls.ChooseConfirm:SetHide(false);
+	
+	-- Assume true
+	OnYes();
 end
 Controls.FoundReligion:RegisterCallback(Mouse.eLClick, FoundReligion);
 
