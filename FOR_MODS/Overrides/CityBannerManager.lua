@@ -1046,7 +1046,7 @@ local function RefreshCityBannersNow()
 				local allyID, ally
 
 				if isMinorCiv then
-					-- Update Quests
+				-- Update Quests
 					instance.CityQuests:SetText( GetActiveQuestText( g_activePlayerID, cityOwnerID ) )
 					instance.CityQuests:SetHide( false )
 
@@ -1056,17 +1056,28 @@ local function RefreshCityBannersNow()
 					instance.StatusIconBG:SetTexture( info and info.StatusIcon or "Blank.dds" )
 					instance.StatusIconBG:SetTextureOffsetVal( 0, 0 )
 					instance.StatusIcon:SetTexture( (GameInfo.MinorCivTraits[ (GameInfo.MinorCivilizations[ cityOwner:GetMinorCivType() ] or {}).MinorCivTrait or -1 ] or {}).TraitIcon or "Blank.dds" )
-					-- Update Pledge
+				-- Update Pledge
 					if gk_mode then
 						local pledge = g_activePlayer:IsProtectingMinor( cityOwnerID )
 						local free = pledge and cityOwner:CanMajorWithdrawProtection( g_activePlayerID )
 						instance.Pledge1:SetHide( not pledge or free )
 						instance.Pledge2:SetHide( not free )
 					end
-					-- Update Allies
+				-- Update Allies
 					allyID = cityOwner:GetAlly()
 					ally = Players[ allyID ]
+					
+				-- Update influence status meter				
+					-- If INF is 0, don't bother showing the meter
+					if (Players[cityOwnerID]:GetMinorCivFriendshipWithMajor(g_activePlayerID) == 0) then
+						instance.StatusMeterFrame:SetHide(true);
+					else
+						instance.StatusMeterFrame:SetHide(false);
+					end
+					
+					UpdateCityStateStatusUI(g_activePlayerID, cityOwnerID, instance.PositiveStatusMeter, instance.NegativeStatusMeter, instance.StatusMeterMarker, instance.StatusIconBG);
 				else
+				    instance.StatusMeterFrame:SetHide( true );
 					instance.CityQuests:SetHide( true )
 					local civInfo = GameInfo.Civilizations[ cityOwner:GetCivilizationType() ]
 

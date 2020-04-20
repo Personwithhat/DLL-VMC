@@ -189,6 +189,13 @@
 						<Image ID="Pledge2" Anchor="R,B" Offset="-5,-2" Size="22,22" TextureOffset="176,0" Texture="FontIcons.dds" Hidden="1" ToolTip="TXT_KEY_POP_CSTATE_PLEDGE_TO_PROTECT"/>
 					</Image>
 				</Container>
+				<!-- Influence status meter -->
+				<Image ID="StatusMeterFrame" Anchor="C,B" Offset="0,-5" AnchorSide="O.I" Texture="Assets/UI/Art/Notification/CityStateMeterBase.dds" Size="161.7" Hidden="1">
+					<TextureBar ID="NegativeStatusMeter" Anchor="L,C" Size="81.7" Direction="Left" Texture="Assets/UI/Art/Notification/CityStateMeterBaseRed.dds" Hidden="0"/>
+					<TextureBar ID="PositiveStatusMeter" Anchor="R,C" Size="81.7" Direction="Right" Texture="Assets/UI/Art/Notification/CityStateMeterBaseBlue.dds" Hidden="0"/>
+					<Image Anchor="C,C" Texture="Assets/UI/Art/Notification/CityStateMeterFrameQuartered_Black.dds" Size="161.7" Hidden="0"/>
+					<Image ID="StatusMeterMarker" Anchor="C,C" Offset="0,1" AnchorSide="O.I" Texture="Assets/UI/Art/Notification/CityStateMeterFrameIcon16.dds" Size="16,16" Hidden="0"/>
+				</Image>
 			</Stack>
 			<!-- City Health Bar -->
 			<Box ID="CityBannerHealthBarBase" Anchor="C,C" Offset="0,-12" Size="100,5" Color="0,0,0,255">
@@ -202,7 +209,7 @@
 			<Label ID="CityStrength" Anchor="C,C" Offset="6,-24" Font="TwCenMT16" Color0="255,255,200,255" Color1="0,0,0,200" ForceNonIME="1" FontStyle="Stroke" ToolTip="TXT_KEY_CITYVIEW_CITY_COMB_STRENGTH_TT"/>
 			<Container Anchor="C,C" Offset="0,-24" Size="50,20" ToolTip="TXT_KEY_CITYVIEW_CITY_COMB_STRENGTH_TT"/>
 			<!-- Lower Icons -->
-			<Stack ID="IconsStack" Anchor="C,T" Offset="0,22" StackGrowth="Left" Padding="0">
+			<Stack ID="IconsStack" Anchor="C,T" Offset="0,25" StackGrowth="Left" Padding="0">
 				<TextButton ID="CitySpy" String="[ICON_SPY]" Hidden="1"/>
 				<TextButton ID="CityDiplomat" String="[ICON_DIPLOMAT]" Hidden="1"/>
 				<TextButton ID="CityQuests"/>
