@@ -25,6 +25,8 @@
 #include "CvAchievementUnlocker.h"
 #include "CvUnitCycler.h"
 
+#include <deque>
+
 class CvPlayerPolicies;
 class CvEconomicAI;
 class CvMilitaryAI;
@@ -1829,6 +1831,14 @@ public:
 #endif
 
 	bool hasTurnTimerExpired();
+
+	struct delCall {
+		ResourceTypes eIndex;
+		int iChange;
+		bool bIgnoreResourceWarning;
+	};
+	std::deque<delCall> delayedResourceUpdates;
+	void runDelayedUpdates();
 
 protected:
 	class ConqueredByBoolField

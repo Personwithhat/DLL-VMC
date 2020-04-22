@@ -19839,10 +19839,25 @@ int CvPlayer::getNumResourceTotal(ResourceTypes eIndex, bool bIncludeImport) con
 }
 
 //	--------------------------------------------------------------------------------
+void CvPlayer::runDelayedUpdates() {
+	while (!delayedResourceUpdates.empty())
+	{
+		delCall args = delayedResourceUpdates.front();
+		changeNumResourceTotal(args.eIndex, args.iChange, args.bIgnoreResourceWarning);
+		delayedResourceUpdates.pop_front();
+	}
+}
 void CvPlayer::changeNumResourceTotal(ResourceTypes eIndex, int iChange, bool bIgnoreResourceWarning)
 {
 	CvAssert(eIndex >= 0);
 	CvAssert(eIndex < GC.getNumResourceInfos());
+
+	// Delay resource-changes (strat/lux/etc.) call until start of SimPhase
+	if (isHuman() && GC.getGame().isWarPhase()) {
+		delCall tmp = { eIndex, iChange, bIgnoreResourceWarning };
+		delayedResourceUpdates.push_back(tmp);
+		return;
+	}
 
 	if(iChange != 0)
 	{

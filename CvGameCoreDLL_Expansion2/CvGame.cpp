@@ -7877,6 +7877,16 @@ void CvGame::doTurn()
 //
 // ^ END OF TURN
 //
+	// Process delayed resource updates
+	for (iI = 0; iI < MAX_PLAYERS; iI++)
+	{
+		CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
+		if (player.isAlive() && player.isHuman())
+		{
+			player.runDelayedUpdates();
+		}
+	}
+
 	//We reset the turn timer now so that we know that the turn timer has been reset at least once for
 	//this turn.  CvGameController::Update() will continue to reset the timer if there is prolonged ai processing.
 	if (!isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
