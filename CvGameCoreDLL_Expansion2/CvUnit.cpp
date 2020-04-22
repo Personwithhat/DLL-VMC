@@ -2130,7 +2130,7 @@ void CvUnit::doTurn()
 	if(GetActivityType() == ACTIVITY_AWAKE)
 	{
 		auto_ptr<ICvUnit1> pDllUnit(new CvDllUnit(this));
-		gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), /*bDim*/ false);
+		gDLL->GameplayUnitShouldDimFlag(pDllUnit.get(), /*bDim*/ getMoves() <= 0);
 	}
 
 	// If we told our Unit to sleep last turn and it can now Fortify switch states

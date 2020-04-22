@@ -1566,17 +1566,14 @@ void CvGame::update()
 						}
 
 						// But only 'activate' the first player initially.
-						// CASE: Turn 0 player already active. TODO: Is this check necessary anymore? Shouldn't be right?
-						if (pFirst) {
-							pFirst->setTurnActive(true, false); // Set, but don't 'do' anything.
+						pFirst->setTurnActive(true, false); // Set, but don't 'do' anything.
 
-							// TODO: Unecessary now?
-							// Update local-player UI when it's not their turn
-							// Just so they can see new values while waiting
-							// Will refresh again when their turn starts.
-							//if (pFirst->GetID() != getActivePlayer())
-							//	GAMEEVENTINVOKE_HOOK(GAMEEVENT_RefreshUI);
-						}
+						// NOTE: Unnecessary now, kept as an FYI on what is possible.
+						// Update local-player UI when it's not their turn
+						// Just so they can see new values while waiting
+						// Will refresh again when their turn starts.
+						//if (pFirst->GetID() != getActivePlayer())
+						//	GAMEEVENTINVOKE_HOOK(GAMEEVENT_RefreshUI);
 
 						resetTurnTimer(true);
 						CUSTOMLOG("Entered: WAR_PHASE");
