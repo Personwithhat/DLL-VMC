@@ -2746,8 +2746,8 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 		if(pkSelectedUnit->getOwner() == getActivePlayer() && !pSelectedUnit->IsBusy())
 		{
 #ifdef MOD_WAR_PHASE_BLOCK
-			// Allow promotion of Military units during simulation phase.
-			bool acceptable = false;// (eMessage == GAMEMESSAGE_DO_COMMAND && (CommandTypes)iData2 == COMMAND_PROMOTION);
+			// Hack for generals/workers to be movable in both phases.
+			bool acceptable = pkSelectedUnit->getUnitInfo().IsWarHack();
 			if (!acceptable && m_bWarPhase != pkSelectedUnit->getUnitInfo().IsWarPhaseOnly()) {
 				CUSTOMLOG("ERROR: Tried to control unit in wrong phase!");
 				return;

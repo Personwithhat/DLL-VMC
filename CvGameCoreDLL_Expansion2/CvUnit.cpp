@@ -690,7 +690,7 @@ void CvUnit::initWithNameOffset(int iID, UnitTypes eUnit, int iNameOffset, UnitA
 	}
 
 #ifdef MOD_WAR_PHASE
-	if (!kPlayer.isHuman() || GC.getGame().isWarPhase() == getUnitInfo().IsWarPhaseOnly())
+	if (!kPlayer.isHuman() || getUnitInfo().IsWarHack() || GC.getGame().isWarPhase() == getUnitInfo().IsWarPhaseOnly())
 #endif
 		setMoves(maxMoves());
 

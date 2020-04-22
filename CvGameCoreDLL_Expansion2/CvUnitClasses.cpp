@@ -967,8 +967,14 @@ bool CvUnitEntry::IsWarPhaseOnly() const
 {
 	return IsMilitaryProduction() ||
 		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_ADMIRAL") ||
-		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL") ||
+		//GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GREAT_GENERAL") || // Currently hacked along with workers.
 		GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_SETTLER");
+}
+/// Apply hack for workers/generals
+bool CvUnitEntry::IsWarHack() const
+{
+	return GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_WORKER") ||
+		   GetUnitClassType() == GC.getInfoTypeForString("UNITCLASS_GENERAL");
 }
 #endif // MOD_WAR_PHASE
 

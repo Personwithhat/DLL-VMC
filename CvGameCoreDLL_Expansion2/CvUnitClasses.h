@@ -126,6 +126,7 @@ public:
 	bool IsMilitaryProduction() const;
 #ifdef MOD_WAR_PHASE
 	bool IsWarPhaseOnly() const;
+	bool IsWarHack() const;
 #endif
 	bool IsPillage() const;
 	bool IsFound() const;

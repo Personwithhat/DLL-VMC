@@ -5045,7 +5045,9 @@ void CvPlayer::DoUnitReset()
 		// Other units should have moves wiped.
 		if (isHuman()) {
 			if (GC.getGame().isWarPhase() != pLoopUnit->getUnitInfo().IsWarPhaseOnly()) {
-				pLoopUnit->finishMoves();
+				// Workers and generals are atm an exception. Don't get healed, but also don't get unit points wiped when in other phase.
+				if(!pLoopUnit->getUnitInfo().IsWarHack())
+					pLoopUnit->finishMoves();
 				continue;
 			}
 		}
