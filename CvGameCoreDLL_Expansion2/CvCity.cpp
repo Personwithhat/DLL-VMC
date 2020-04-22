@@ -13851,6 +13851,11 @@ bool CvCity::IsCanPurchase(bool bTestPurchaseCost, bool bTestTrainable, UnitType
 	CvAssertMsg(eUnitType >= 0 || eBuildingType >= 0 || eProjectType >= 0, "No valid passed in");
 	CvAssertMsg(!(eUnitType >= 0 && eBuildingType >= 0) && !(eUnitType >= 0 && eProjectType >= 0) && !(eBuildingType >= 0 && eProjectType >= 0), "Only one being passed");
 
+	// Only purchase lanschnekts in War-Phase, rest in sim-phase.
+	CvUnitEntry* unitInfo = GC.getUnitInfo(eUnitType);
+	if (eUnitType != NO_UNIT && GC.getGame().isWarPhase() != unitInfo->CanMoveAfterPurchase() && isHuman())
+		return false;
+
 	// Can't purchase anything in a puppeted city
 	// slewis - The Venetian Exception
 	bool bIsPuppet = IsPuppet();
