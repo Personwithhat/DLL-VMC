@@ -648,9 +648,10 @@ bool CvNotifications::GetEndTurnBlockedType(EndTurnBlockingTypes& eBlockingType,
 
 #ifdef MOD_WAR_PHASE
 	/*
-	These two only active end-turn blockers for War Phase:
+	These are the only active end-turn blockers for War Phase:
 		ENDTURN_BLOCKING_STACKED_UNITS
 		ENDTURN_BLOCKING_UNITS
+		ENDTURN_BLOCKING_UNIT_PROMOTION
 
 	And stacked-units without movement available remain where they are.
 	Without triggering the ENDTURN_BLOCKING_STACKED_UNITS notification.

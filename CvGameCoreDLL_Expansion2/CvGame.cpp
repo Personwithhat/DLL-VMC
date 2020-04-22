@@ -2213,7 +2213,7 @@ void CvGame::updateTestEndTurn()
 #ifndef MOD_WAR_PHASE
 			if(activePlayer.hasPromotableUnit() && !GC.getGame().isOption(GAMEOPTION_PROMOTION_SAVING))
 #else
-			if (!isWarPhase() && activePlayer.hasPromotableUnit() && !GC.getGame().isOption(GAMEOPTION_PROMOTION_SAVING))
+			if (isWarPhase() && activePlayer.hasPromotableUnit() && !GC.getGame().isOption(GAMEOPTION_PROMOTION_SAVING))
 #endif
 			{
 				eEndTurnBlockingType = ENDTURN_BLOCKING_UNIT_PROMOTION;
@@ -2747,7 +2747,7 @@ void CvGame::selectionListGameNetMessage(int eMessage, int iData2, int iData3, i
 		{
 #ifdef MOD_WAR_PHASE_BLOCK
 			// Allow promotion of Military units during simulation phase.
-			bool acceptable = (eMessage == GAMEMESSAGE_DO_COMMAND && (CommandTypes)iData2 == COMMAND_PROMOTION);
+			bool acceptable = false;// (eMessage == GAMEMESSAGE_DO_COMMAND && (CommandTypes)iData2 == COMMAND_PROMOTION);
 			if (!acceptable && m_bWarPhase != pkSelectedUnit->getUnitInfo().IsWarPhaseOnly()) {
 				CUSTOMLOG("ERROR: Tried to control unit in wrong phase!");
 				return;
@@ -3118,14 +3118,6 @@ bool CvGame::canHandleAction(int iAction, CvPlot* pPlot, bool bTestVisible)
 	CvActionInfo* pActionInfo = GC.getActionInfo(iAction);
 	CvAssert(pActionInfo != NULL);
 	if(!pActionInfo) return false;
-
-#ifdef MOD_WAR_PHASE_BLOCK
-	// PERSONAL TODO: Move other stuff here, as well!! (Similar to check below for isSimultaneousTurns, should work safely!)
-	// This is to hide the promotion pop-up on unit during war phase.
-	// UnitPanel.lua is affected by this.
-	if (isWarPhase() && pActionInfo->getSubType() == ACTIONSUBTYPE_PROMOTION)
-		return false;
-#endif 
 
 	if(pActionInfo->getControlType() != NO_CONTROL)
 	{

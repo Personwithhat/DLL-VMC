@@ -10609,6 +10609,11 @@ bool CvUnit::build(BuildTypes eBuild)
 bool CvUnit::canPromote(PromotionTypes ePromotion, int iLeaderUnitId) const
 {
 	VALIDATE_OBJECT
+
+	// May only promote units during war-phase.
+	if (!GC.getGame().isWarPhase() && isHuman())
+		return false;
+
 	if(iLeaderUnitId >= 0)
 	{
 		if(iLeaderUnitId == GetID())
@@ -10918,6 +10923,10 @@ bool CvUnit::CanUpgradeRightNow(bool bOnlyTestVisible) const
 	VALIDATE_OBJECT
 	// Is Unit in a state where it can upgrade?
 	if(!isReadyForUpgrade())
+		return false;
+
+	// May only upgrade units during war-phase.
+	if (!GC.getGame().isWarPhase() && isHuman())
 		return false;
 
 	UnitTypes eUpgradeUnitType = GetUpgradeUnitType();
