@@ -2438,9 +2438,10 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 {
 	TeamTypes eTeam = GET_PLAYER(ePlayer).getTeam();
 
-	ImprovementTypes eImprovement;
+	CvBuildInfo& thisBuildInfo = *GC.getBuildInfo(eBuild);
+	ImprovementTypes eImprovement = ((ImprovementTypes)(thisBuildInfo.getImprovement()));
 	ImprovementTypes eFinalImprovementType;
-	RouteTypes eRoute;
+	RouteTypes eRoute = ((RouteTypes)(GC.getBuildInfo(eBuild)->getRoute()));
 	bool bValid;
 
 	// Can't build nothing!
@@ -2451,8 +2452,29 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 
 	bValid = false;
 
+	// WAR_PHASE: Limit certain build actions to war-phase only.
+	// clearFeature and buildCitadel fine in both phases for now.
+	static const BuildTypes bFort = (BuildTypes)GC.getInfoTypeForString("BUILD_FORT");
+	static const BuildTypes bCitadel = (BuildTypes)GC.getInfoTypeForString("BUILD_CITADEL");
+	static const ImprovementTypes iFort = (ImprovementTypes)GC.getInfoTypeForString("IMPROVEMENT_FORT");
+	static const ImprovementTypes iCitadel = (ImprovementTypes)GC.getInfoTypeForString("IMPROVEMENT_CITADEL");
+
+	//bool clearFeature = thisBuildInfo.isFeatureRemove(getFeatureType()); // Clear terrain features such as forest/marsh/jungle/etc.
+	bool repairImprovement = thisBuildInfo.isRepair() && IsImprovementPillaged();
+	bool repairRoad = thisBuildInfo.isRepair() && IsRoutePillaged();
+	bool buildRoad = (eRoute != NO_ROUTE);
+	bool removeRoad = thisBuildInfo.IsRemoveRoute();
+
+	bool warPhaseOnly =
+		(eBuild == bFort) || // Build fort
+		(repairImprovement && (eImprovement == iFort || eImprovement == iCitadel)) || // Repairing fort or citadel
+		buildRoad || repairRoad || removeRoad;	 // Build/repair/remove road
+
+	if (GC.getGame().isWarPhase() != warPhaseOnly && GET_PLAYER(ePlayer).isHuman())
+		return false;
+	//~ WAR_PHASE
+
 	// Repairing an Improvement that's been pillaged
-	CvBuildInfo& thisBuildInfo = *GC.getBuildInfo(eBuild);
 	if(thisBuildInfo.isRepair())
 	{
 		// Can only repair improvements outside of other player's lands.
@@ -2495,8 +2517,6 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 			return false;
 		}
 	}
-
-	eImprovement = ((ImprovementTypes)(thisBuildInfo.getImprovement()));
 
 	// Improvement
 	if(eImprovement != NO_IMPROVEMENT)
@@ -2633,8 +2653,6 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 
 		bValid = true;
 	}
-
-	eRoute = ((RouteTypes)(GC.getBuildInfo(eBuild)->getRoute()));
 
 	// Route
 	if(eRoute != NO_ROUTE)
