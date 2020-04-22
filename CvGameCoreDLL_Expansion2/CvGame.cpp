@@ -1510,9 +1510,9 @@ void CvGame::update()
 					// Switch which state we are entering. If war -> non-war, if non-war -> war.
 					m_bWarPhase = !m_bWarPhase;
 
-					if (m_bWarPhase) {
+					if (!m_bWarPhase) {
 						doTurn();
-						CUSTOMLOG("Entered: WAR_PHASE");
+						CUSTOMLOG("Entered: SIM_PHASE");
 					} else {
 					//***
 					//*** Minimal doTurn(). These are all necessary, some issues can only be hit when more than 1 human in game.
@@ -1553,17 +1553,33 @@ void CvGame::update()
 						gDLL->SendAICivsProcessed();
 						//m_lastTurnAICivsProcessed = getGameTurn();
 
-						// Activate human players with simultaneous turns now, after war-phase.
+						// Activate only first player upon entering war-phase.
+						CvPlayer* pFirst = NULL;
 						for (int iI = 0; iI < MAX_PLAYERS; iI++)
 						{
 							CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
 							if (!player.isTurnActive() && player.isHuman() && player.isAlive()) {
-								player.setTurnActive(true, false); // Set, but don't 'do' anything.
-								player.DoUnitReset(); // Only clean up unit movement points/etc.
+								if (!pFirst)
+									pFirst = &player;
+								player.DoUnitReset(); // Clean up unit movement points/heal/etc. for all players.
 							}
 						}
+
+						// But only 'activate' the first player initially.
+						// CASE: Turn 0 player already active. TODO: Is this check necessary anymore? Shouldn't be right?
+						if (pFirst) {
+							pFirst->setTurnActive(true, false); // Set, but don't 'do' anything.
+
+							// TODO: Unecessary now?
+							// Update local-player UI when it's not their turn
+							// Just so they can see new values while waiting
+							// Will refresh again when their turn starts.
+							//if (pFirst->GetID() != getActivePlayer())
+							//	GAMEEVENTINVOKE_HOOK(GAMEEVENT_RefreshUI);
+						}
+
 						resetTurnTimer(true);
-						CUSTOMLOG("Entered: SIM_PHASE");
+						CUSTOMLOG("Entered: WAR_PHASE");
 					}
 				}
 #endif
@@ -1653,33 +1669,19 @@ void CvGame::CheckPlayerTurnDeactivate()
 		SetLastTurnAICivsProcessed();
 		if (isOption(GAMEOPTION_DYNAMIC_TURNS) || isOption(GAMEOPTION_SIMULTANEOUS_TURNS))
 		{//Activate human players who are playing simultaneous turns now that we've finished moves for the AI.
-			CvPlayer* pFirst = NULL;
 			for (int iI = 0; iI < MAX_PLAYERS; iI++)
 			{
-				// Calculate tick/turns for players, after AI all done
+				// Calculate tick/turns for players, after AI all done.
+				// Activate each player for SIM_PHASE
 				CvPlayer& player = GET_PLAYER((PlayerTypes)iI);
 				if (!player.isTurnActive() && player.isHuman() && player.isAlive() && player.isSimultaneousTurns())
 				{
-					if (!pFirst)
-						pFirst = &player;
-
 					player.calcTurn();
+					player.setTurnActive(true, false);
 				}
 			}
 
 			resetTurnTimer(true);
-
-			// But only 'activate' the first player initially.
-			// CASE: Turn 0 player already active.
-			if (pFirst) {
-				pFirst->setTurnActive(true, false);
-
-				// Update local-player UI even if it's not their turn.
-				// Just so they can see new values while waiting
-				// Will refresh again when their turn starts.
-				if (pFirst->GetID() != getActivePlayer())
-					GAMEEVENTINVOKE_HOOK(GAMEEVENT_RefreshUI);
-			}
 		}
 	}
 
@@ -2805,7 +2807,7 @@ void CvGame::selectedCitiesGameNetMessage(int eMessage, int iData2, int iData3, 
 	// Need to improve all this anyway. Should simply not show the UI buttons, instead of 'silently' blocking action.
 #ifdef MOD_WAR_PHASE_BLOCK
 	// Task handled further down, since lua may bypass this/etc. >.>
-	if (isWarPhase() && eMessage != GAMEMESSAGE_DO_TASK) {
+	if (isWarPhase() && eMessage != GAMEMESSAGE_DO_TASK && getGameTurn() != 0) {
 		CUSTOMLOG("ERROR: Tried to do something with city during war. Nope :)");
 		return;
 	}

@@ -128,9 +128,12 @@ void CvDllNetMessageHandler::ResponseIgnoreWarning(PlayerTypes ePlayer, TeamType
 }
 //------------------------------------------------------------------------------
 
+// HACK:
+// Block sim-phase stuff during war phase, except on turn 0!
+// Cleanest way to load/start game so have to allow movement AND simming on turn 0.
 #ifdef MOD_WAR_PHASE_BLOCK
 #define WARP_PHASE_CHECK \
-	if (GC.getGame().isWarPhase()) {\
+	if (GC.getGame().isWarPhase() && GC.getGame().getGameTurn() != 0) {\
 		CUSTOMLOG("ERROR: tweaking city during war! Nope :)");\
 		return;\
 	}
