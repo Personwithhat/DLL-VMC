@@ -5038,49 +5038,49 @@ void CvPlayer::DoUnitReset()
 	CvUnit* pLoopUnit;
 	int iLoop;
 
-	for(pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
+	for (pLoopUnit = firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = nextUnit(&iLoop))
 	{
-#ifdef MOD_WAR_PHASE
-		// Refresh units that do belong to the phase we are in
-		// Other units should have moves wiped.
-		if (isHuman()) {
-			if (GC.getGame().isWarPhase() != pLoopUnit->getUnitInfo().IsWarPhaseOnly()) {
-				// Workers and generals are atm an exception. Don't get healed, but also don't get unit points wiped when in other phase.
-				if(!pLoopUnit->getUnitInfo().IsWarHack())
-					pLoopUnit->finishMoves();
-				continue;
-			}
-		}
-#endif // MOD_WAR_PHASE
-
-		// HEAL UNIT?
-		if(!pLoopUnit->isEmbarked())
-		{
-			if(pLoopUnit->hasMoved())
+		// Heal units that do not belong in the phase we just entered
+		bool clearUnit = (GC.getGame().isWarPhase() != pLoopUnit->getUnitInfo().IsWarPhaseOnly());
+		if (!isHuman() || clearUnit) {
+			// HEAL UNIT?
+			if (!pLoopUnit->isEmbarked())
 			{
-				if(pLoopUnit->isAlwaysHeal())
+				if (pLoopUnit->hasMoved())
 				{
-					pLoopUnit->doHeal();
+					if (pLoopUnit->isAlwaysHeal())
+					{
+						pLoopUnit->doHeal();
+					}
+				}
+				else
+				{
+					if (pLoopUnit->IsHurt())
+					{
+						pLoopUnit->doHeal();
+					}
 				}
 			}
-			else
-			{
-				if(pLoopUnit->IsHurt())
-				{
-					pLoopUnit->doHeal();
-				}
-			}
-		}
 
-		// PERSONAL TODO: Citadel damage calculated here .-.
-		int iCitadelDamage;
-		if(pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
-		{
+			// PERSONAL TODO: Citadel damage calculated here .-.
+			int iCitadelDamage;
+			if (pLoopUnit->IsNearEnemyCitadel(iCitadelDamage))
+			{
 #if defined(MOD_API_UNIT_STATS)
-			pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, -1, /*fAdditionalTextDelay*/ 0.5f);
+				pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, -1, /*fAdditionalTextDelay*/ 0.5f);
 #else
-			pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, /*fAdditionalTextDelay*/ 0.5f);
+				pLoopUnit->changeDamage(iCitadelDamage, NO_PLAYER, /*fAdditionalTextDelay*/ 0.5f);
 #endif
+			}
+		}
+
+		// And wipe their movement as a jic + skip rest.
+		if (isHuman() && clearUnit) {
+			// Workers and generals are atm an exception. They don't get movement points reset when their official phase 'ends'.
+			// Generals are considered 'sim-phase' units to follow same flow as workers xd
+			if (!pLoopUnit->getUnitInfo().IsWarHack())
+				pLoopUnit->finishMoves();
+			continue;
 		}
 
 		// Finally (now that healing is done), restore movement points
