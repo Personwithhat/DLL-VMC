@@ -2625,6 +2625,18 @@ bool CvPlot::canBuild(BuildTypes eBuild, PlayerTypes ePlayer, bool bTestVisible,
 						{
 							return false;
 						}
+
+						// May build citadels during SIM_PHASE
+						// But only if not adjacent to any other player.
+						if (!GC.getGame().isWarPhase() && (eBuild == bCitadel) && GET_PLAYER(ePlayer).isHuman()) {
+							for (int i = 0; i < MAX_PLAYERS; i++)
+							{
+								CvPlayer& kCurrPlayer = GET_PLAYER((PlayerTypes)i);
+								if (kCurrPlayer.isAlive() && getTeam() != kCurrPlayer.getTeam())
+									if (isAdjacentTeam(kCurrPlayer.getTeam(), false))
+										return false;
+							}
+						}
 					}
 					// Only City State Territory - Can only be built in City-State territory (not our own lands)
 					else if (GC.getImprovementInfo(eImprovement)->IsOnlyCityStateTerritory())
