@@ -1050,6 +1050,10 @@ bool CvTeam::canDeclareWar(TeamTypes eTeam) const
 		return false;
 	}
 
+	// Must be in war-phase to declare war.
+	if (!GC.getGame().isWarPhase() && isHuman())
+		return false;
+
 	// Can't declare war on CS if we are allied with a Major power that is also allied with this CS
 	for (int iI = MAX_MAJOR_CIVS; iI < MAX_PLAYERS; iI++)
 	{
