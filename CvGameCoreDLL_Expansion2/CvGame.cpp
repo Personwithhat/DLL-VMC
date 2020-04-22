@@ -4939,23 +4939,24 @@ int CvGame::getMaxTurnLen(PlayerTypes playerID)
 			}
 		}
 
+		// TODO: We ignore TurnTimers entry in DB, we should probably use that instead!
 		// Usual dynamic turn-timer, based on units and cities.
-		const CvTurnTimerInfo& kTurnTimer = CvPreGame::turnTimerInfo();
-		baseTurnTime = (kTurnTimer.getBaseTime() +
-			(kTurnTimer.getCityResource() * iMaxCities) +
-			(kTurnTimer.getUnitResource() * iMaxUnits));
+		//const CvTurnTimerInfo& kTurnTimer = CvPreGame::turnTimerInfo();
+		//baseTurnTime = (kTurnTimer.getBaseTime() +
+		//	(kTurnTimer.getCityResource() * iMaxCities) +
+		//	(kTurnTimer.getUnitResource() * iMaxUnits));
+
+		baseTurnTime = 25 + 9 * iMaxCities;// +3 * iMaxUnits;
 
 	} else {
-		// Any war-phase unit for current player adds 2 seconds to timer.
+		// Any war-phase unit for current player adds to timer
 		CvPlayer& cPlayer = GET_PLAYER(playerID);
 		CvUnit* pLoopUnit; int iLoop;
 		for (pLoopUnit = cPlayer.firstUnit(&iLoop); pLoopUnit != NULL; pLoopUnit = cPlayer.nextUnit(&iLoop))
 			if (pLoopUnit->getUnitInfo().IsWarPhaseOnly())
-				baseTurnTime += 2;
+				iMaxUnits++;
 
-		// Minimum of 5 second timer.
-		if (baseTurnTime < 5)
-			baseTurnTime = 5;
+		baseTurnTime = 20 + 3 * iMaxUnits;
 	}
 
 	return baseTurnTime;
