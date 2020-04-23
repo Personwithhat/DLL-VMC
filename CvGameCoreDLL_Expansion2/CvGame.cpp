@@ -1568,6 +1568,14 @@ void CvGame::update()
 						// But only 'activate' the first player initially.
 						pFirst->setTurnActive(true, false); // Set, but don't 'do' anything.
 
+						// Enabling input for all players in war-phase, even if not their turn
+						// So they can look around the map/etc. and do war-phase only actions.
+						// Regular input-blocking (no unit movement, can queue moves though) handled by DLL as per usual.
+						if (pFirst->GetID() != getActivePlayer()){
+							CUSTOMLOG("INPUT: WAR-PHASE Enabling Input");
+							GAMEEVENTINVOKE_HOOK(GAMEEVENT_EnableInput);
+						}
+
 						// NOTE: Unnecessary now, kept as an FYI on what is possible.
 						// Update local-player UI when it's not their turn
 						// Just so they can see new values while waiting
