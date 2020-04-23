@@ -1064,6 +1064,8 @@ void CvDllNetMessageHandler::ResponseUpdatePolicies(PlayerTypes ePlayer, bool bN
 {
 	CvPlayerAI& kPlayer = GET_PLAYER(ePlayer);
 
+	WARP_PHASE_CHECK
+
 	// Policy Update
 	if(bNOTPolicyBranch)
 	{

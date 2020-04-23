@@ -182,6 +182,12 @@ function OnEventReceived( popupInfo )
 	if popupInfo.Type == ButtonPopupTypes.BUTTONPOPUP_CITY_STATE_MESSAGE
 	or popupInfo.Type == ButtonPopupTypes.BUTTONPOPUP_CITY_STATE_DIPLO
 	then
+		-- Don't show CS screen when in war phase.
+		if Game.isWarPhase() then
+			-- DLL/something hardcoded expectation, otherwise you will accumulate these.
+			Events.SerialEventGameMessagePopupProcessed.CallImmediate( popupInfo.Type, 0 )
+			return true
+		end
 	elseif popupInfo.Type == ButtonPopupTypes.BUTTONPOPUP_CITY_STATE_GREETING then
 		m_lastAction = kiGreet
 	else
