@@ -520,7 +520,7 @@ local function UpdateRangeIcons( plotIndex, city, instance )
 
 	if city and instance then
 
-		local hideRangeStrikeButton = city:GetOwner() ~= g_activePlayerID or not city:CanRangeStrikeNow()
+		local hideRangeStrikeButton = city:GetOwner() ~= g_activePlayerID or not city:CanRangeStrikeNow() or not Game.isWarPhase()
 		if instance.CityRangeStrikeButton then
 			instance.CityRangeStrikeButton:SetHide( hideRangeStrikeButton )
 		end
