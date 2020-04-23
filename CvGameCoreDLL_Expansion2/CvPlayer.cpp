@@ -5104,6 +5104,12 @@ void CvPlayer::DoUnitReset()
 			}
 		}
 
+		// Don't allow units purchased in sim-phase to be reset and move in war-phase
+		if (isHuman() && pLoopUnit->purchasedNow) {
+			pLoopUnit->purchasedNow = false;
+			pLoopUnit->finishMoves();
+		}
+
 		pLoopUnit->SetIgnoreDangerWakeup(false);
 		pLoopUnit->setMadeAttack(false);
 		pLoopUnit->setMadeInterception(false);
